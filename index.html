@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CO Sync Timer</title>
+<style>
+  :root{
+    --w: clamp(26px, 12vmin, 58px);   /* digit width — drives the whole clock size */
+    --t: calc(var(--w) * 0.20);       /* segment thickness */
+    --led:#ff2d24; --led-dim:rgba(255,45,36,.085); --amber:#ff8a1e;
+  }
+  *{ margin:0; padding:0; box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    background:radial-gradient(ellipse 120% 90% at 50% 30%, #1c2128 0%, #0a0c0f 70%, #050608 100%);
+    display:flex; align-items:center; justify-content:center; overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    user-select:none; padding:6vmin;
+  }
+  /* --- the device --- */
+  .clock{
+    background:linear-gradient(#3a3f47,#23272d 38%,#191c21);
+    border-radius:1.6vmin; padding:3vmin 3.4vmin 2.4vmin;
+    box-shadow:0 .2vmin .3vmin rgba(255,255,255,.12) inset, 0 -1vmin 2vmin rgba(0,0,0,.5) inset,
+               0 3vmin 5vmin rgba(0,0,0,.55), 0 .6vmin 1.2vmin rgba(0,0,0,.6);
+    -webkit-box-reflect:below .5vmin linear-gradient(transparent 58%, rgba(255,255,255,.10));
+  }
+  .brand{
+    display:flex; align-items:center; gap:1.4vmin; margin:0 .4vmin 1.6vmin;
+    font-size:max(9px,2.1vmin); letter-spacing:.32em; text-transform:uppercase;
+    color:#8a929c; font-weight:700;
+  }
+  .pwr{ width:1.1vmin; height:1.1vmin; min-width:6px; min-height:6px; border-radius:50%;
+        background:var(--led); box-shadow:0 0 1vmin var(--led),0 0 .4vmin #fff8; }
+  /* --- LED panel --- */
+  .panel{
+    display:flex; align-items:center; justify-content:center; gap:calc(var(--w)*.22);
+    background:linear-gradient(#160505,#0a0202); border-radius:1vmin;
+    padding:calc(var(--w)*.42) calc(var(--w)*.5);
+    box-shadow:0 .3vmin .8vmin rgba(0,0,0,.7) inset, 0 0 0 .25vmin #000;
+  }
+  .digit{ position:relative; width:var(--w); height:calc(var(--w)*1.8); }
+  .seg{ position:absolute; background:var(--led-dim); transition:background .06s, box-shadow .06s; }
+  .seg.on{ background:var(--led); box-shadow:0 0 .8vmin var(--led), 0 0 2vmin rgba(255,45,36,.55); }
+  .seg.h{ left:0; width:var(--w); height:var(--t);
+          clip-path:polygon(6% 0,94% 0,100% 50%,94% 100%,6% 100%,0 50%); }
+  .seg.v{ top:0; width:var(--t); height:calc(50% + var(--t)*.5);
+          clip-path:polygon(0 6%,50% 0,100% 6%,100% 94%,50% 100%,0 94%); }
+  .seg.a{ top:0; } .seg.g{ top:calc(50% - var(--t)/2); } .seg.d{ bottom:0; top:auto; }
+  .seg.f{ left:0; } .seg.b{ right:0; } .seg.e{ bottom:0; top:auto; left:0; } .seg.c{ bottom:0; top:auto; right:0; }
+  .colon{ display:flex; flex-direction:column; justify-content:center; gap:calc(var(--w)*.55); }
+  .colon i{ width:var(--t); height:var(--t); border-radius:50%; background:var(--led);
+            box-shadow:0 0 .8vmin var(--led); }
+  body.running .colon i{ animation:blink 1s steps(1) infinite; }
+  @keyframes blink{ 50%{ opacity:.12; box-shadow:none; } }
+  /* --- controls --- */
+  .controls{ display:flex; gap:1.6vmin; justify-content:center; margin-top:2.2vmin; }
+  button{
+    font:inherit; font-size:max(10px,1.9vmin); font-weight:700; letter-spacing:.14em;
+    color:#cfd5dc; background:linear-gradient(#41464e,#2b2f35); border:none; cursor:pointer;
+    border-radius:.8vmin; padding:1.3vmin 3.4vmin; text-transform:uppercase;
+    box-shadow:0 .15vmin 0 rgba(255,255,255,.14) inset, 0 .5vmin .8vmin rgba(0,0,0,.45);
+    -webkit-tap-highlight-color:transparent; transition:transform .08s, filter .12s;
+  }
+  button:hover{ filter:brightness(1.15); }
+  button:active{ transform:translateY(.3vmin); box-shadow:0 .2vmin .4vmin rgba(0,0,0,.5) inset; }
+  /* --- states --- */
+  body.warn{ --led:var(--amber); }
+  body.warn .pwr, body.warn .colon i{ background:var(--amber); box-shadow:0 0 1vmin var(--amber); }
+  body.done .panel{ animation:alarm .6s steps(1) infinite; }
+  @keyframes alarm{ 50%{ filter:brightness(.25); } }
+</style>
+</head>
+<body>
+  <div class="clock">
+    <div class="brand"><span class="pwr"></span><span id="label">CO&nbsp;SYNC</span></div>
+    <div class="panel" id="panel"></div>
+    <div class="controls">
+      <button id="startpause">Start</button>
+      <button id="reset">Reset</button>
+    </div>
+  </div>
+<script>
+  // URL params:  ?minutes=42  ?seconds=30  ?label=IDS  ?warn=60  ?autostart=true
+  const q = new URLSearchParams(location.search);
+  const mins = q.has('minutes') ? (parseInt(q.get('minutes'))||0) : 5;
+  const secs = parseInt(q.get('seconds'))||0;
+  const label = q.get('label');
+  const warnAt = parseInt(q.get('warn'));
+  const total = Math.max(1, mins*60 + secs);
+  let remaining = total, running = false, tick = null;
+
+  const SEG = {0:'abcdef',1:'bc',2:'abdeg',3:'abcdg',4:'bcfg',5:'acdfg',6:'acdefg',7:'abc',8:'abcdefg',9:'abcdfg'};
+  const panel = document.getElementById('panel');
+  const digits = [];
+  function buildDigit(){
+    const d = document.createElement('div'); d.className='digit'; const map={};
+    'a b c d e f g'.split(' ').forEach(L=>{
+      const s=document.createElement('div');
+      s.className='seg '+L+' '+('agd'.includes(L)?'h':'v'); d.appendChild(s); map[L]=s;
+    });
+    digits.push(map); return d;
+  }
+  panel.appendChild(buildDigit()); panel.appendChild(buildDigit());
+  const colon=document.createElement('div'); colon.className='colon'; colon.innerHTML='<i></i><i></i>'; panel.appendChild(colon);
+  panel.appendChild(buildDigit()); panel.appendChild(buildDigit());
+
+  if(label) document.getElementById('label').textContent = label;
+  document.title = (label?label+' — ':'') + 'Timer';
+
+  function setDigit(i,n){ const on=SEG[n]; const m=digits[i];
+    for(const L in m) m[L].classList.toggle('on', on.includes(L)); }
+  function render(){
+    const m=Math.floor(remaining/60), s=remaining%60;
+    setDigit(0,Math.floor(m/10)); setDigit(1,m%10);
+    setDigit(2,Math.floor(s/10)); setDigit(3,s%10);
+    const warn = warnAt ? remaining<=warnAt : remaining<=Math.max(30,total*0.1);
+    document.body.classList.toggle('warn', warn && remaining>0);
+    document.body.classList.toggle('done', remaining<=0);
+  }
+  function start(){ if(running||remaining<=0) return;
+    running=true; document.body.classList.add('running'); sp.textContent='Pause';
+    tick=setInterval(()=>{ remaining--; render(); if(remaining<=0){ stop(); sp.textContent='Done'; } },1000); }
+  function stop(){ running=false; document.body.classList.remove('running'); clearInterval(tick); if(remaining>0) sp.textContent='Start'; }
+  function reset(){ stop(); remaining=total; document.body.classList.remove('done'); sp.textContent='Start'; render(); }
+  const sp=document.getElementById('startpause');
+  sp.onclick=()=> running?stop():start();
+  document.getElementById('reset').onclick=reset;
+  reset();
+  if(q.get('autostart')==='true') start();
+</script>
+</body>
+</html>
