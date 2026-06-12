@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Partner Adoption</title>
+<style>
+  :root{
+    --bg1:#0e1726; --bg2:#0a0f1a; --card:#111a2b;
+    --ink:#e7eef7; --muted:#7e8ba3; --track:#1c2740;
+    --g1:#22d39a; --g2:#3ad6c4; --g3:#5ee0ff;
+    --glow:rgba(46,214,170,.55);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    background:radial-gradient(ellipse 120% 100% at 50% 0%, var(--bg1) 0%, var(--bg2) 70%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    color:var(--ink); display:flex; align-items:center; justify-content:center;
+    padding:5vmin 6vmin; min-height:100%; overflow:hidden; -webkit-font-smoothing:antialiased;
+  }
+  .card{
+    width:min(680px,100%);
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,0)), var(--card);
+    border:1px solid rgba(255,255,255,.07); border-radius:18px;
+    padding:clamp(20px,4vw,34px) clamp(22px,4.5vw,40px);
+    box-shadow:0 24px 60px rgba(0,0,0,.45), 0 1px 0 rgba(255,255,255,.06) inset;
+  }
+  .top{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .label{ font-size:clamp(11px,1.5vw,13px); letter-spacing:.22em; text-transform:uppercase;
+           color:var(--muted); font-weight:700; }
+  .count{ font-size:clamp(30px,7vw,46px); font-weight:800; letter-spacing:-.02em;
+    background:linear-gradient(95deg,var(--g1),var(--g3)); -webkit-background-clip:text;
+    background-clip:text; color:transparent; text-shadow:0 0 22px var(--glow); }
+  .count small{ font-size:.5em; font-weight:700; -webkit-text-fill-color:var(--muted); }
+  .grid{ display:flex; flex-wrap:wrap; gap:clamp(8px,1.8vw,12px); margin-top:18px; }
+  .dot{
+    width:clamp(16px,4vw,26px); height:clamp(16px,4vw,26px); border-radius:50%;
+    background:var(--track); border:1.5px solid rgba(255,255,255,.10);
+    transition:background .5s, box-shadow .5s, border-color .5s;
+  }
+  .dot.on{ background:linear-gradient(135deg,var(--g1),var(--g2));
+    border-color:transparent; box-shadow:0 0 12px var(--glow); }
+  .foot{ margin-top:16px; font-size:11px; color:var(--muted); opacity:.6; letter-spacing:.04em; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <div class="label" id="label">Partners Live</div>
+      <div class="count"><span id="num">0</span><small> / <span id="total">0</span></small></div>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="foot" id="updated"></div>
+  </div>
+<script>
+  // Params: ?live=9&total=22&label=Partners%20Live&updated=2026-06-12
+  const q = new URLSearchParams(location.search);
+  const live = Math.max(0, parseInt(q.get('live')) || 0);
+  const total = Math.max(1, parseInt(q.get('total')) || 22);
+  const label = q.get('label'); const updated = q.get('updated');
+  if(label) document.getElementById('label').textContent = label;
+  if(updated) document.getElementById('updated').textContent = 'Updated ' + updated;
+  document.getElementById('total').textContent = total;
+
+  const grid = document.getElementById('grid');
+  const dots = [];
+  for(let i=0;i<total;i++){ const d=document.createElement('div'); d.className='dot'; grid.appendChild(d); dots.push(d); }
+
+  // staggered light-up + count-up
+  const num = document.getElementById('num');
+  let lit = 0;
+  function step(){
+    if(lit >= live) return;
+    dots[lit].classList.add('on'); lit++;
+    num.textContent = lit;
+    setTimeout(step, Math.max(40, 600/Math.max(1,live)));
+  }
+  setTimeout(step, 250);
+</script>
+</body>
+</html>
