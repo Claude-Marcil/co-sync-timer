@@ -1,0 +1,5761 @@
+<meta charset="utf-8">
+<title>Sierra — Lever Console</title>
+<style>
+  :root {
+    --paper:#ffffff; --ground:#f4f7f5; --panel:#ffffff; --panel-2:#eef2ef;
+    --ink:#16211c; --ink-2:#3d4d46; --muted:#697a72; --line:#d9e2dc; --line-strong:#c3d0c8;
+    --accent:#157f66; --accent-deep:#0d5a49; --accent-soft:#e4f0eb;
+    --crit:#b23328; --crit-soft:#f6e3e0; --high:#c06a12; --high-soft:#f7e9d8;
+    --med:#b89112; --med-soft:#f6efd6; --info:#157f66; --info-soft:#e4f0eb;
+    --shadow:0 1px 2px rgba(20,40,32,.06), 0 8px 24px rgba(20,40,32,.05);
+    --font-display:"Cambria","Georgia","Times New Roman",serif;
+    --font-sans:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --font-mono:"Cascadia Code","Consolas",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#0e1512; --ground:#0e1512; --panel:#16201b; --panel-2:#1c2822;
+      --ink:#e7efe9; --ink-2:#b3c2ba; --muted:#85988f; --line:#26322b; --line-strong:#33443b;
+      --accent:#46c39f; --accent-deep:#6fd6b6; --accent-soft:#14312a;
+      --crit:#e07a6e; --crit-soft:#35211e; --high:#e0a054; --high-soft:#332616;
+      --med:#d8bd55; --med-soft:#2e2a16; --info:#46c39f; --info-soft:#14312a;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper:#ffffff; --ground:#f4f7f5; --panel:#ffffff; --panel-2:#eef2ef;
+    --ink:#16211c; --ink-2:#3d4d46; --muted:#697a72; --line:#d9e2dc; --line-strong:#c3d0c8;
+    --accent:#157f66; --accent-deep:#0d5a49; --accent-soft:#e4f0eb;
+    --crit:#b23328; --crit-soft:#f6e3e0; --high:#c06a12; --high-soft:#f7e9d8;
+    --med:#b89112; --med-soft:#f6efd6; --info:#157f66; --info-soft:#e4f0eb;
+    --shadow:0 1px 2px rgba(20,40,32,.06), 0 8px 24px rgba(20,40,32,.05);
+  }
+  :root[data-theme="dark"] {
+    --paper:#0e1512; --ground:#0e1512; --panel:#16201b; --panel-2:#1c2822;
+    --ink:#e7efe9; --ink-2:#b3c2ba; --muted:#85988f; --line:#26322b; --line-strong:#33443b;
+    --accent:#46c39f; --accent-deep:#6fd6b6; --accent-soft:#14312a;
+    --crit:#e07a6e; --crit-soft:#35211e; --high:#e0a054; --high-soft:#332616;
+    --med:#d8bd55; --med-soft:#2e2a16; --info:#46c39f; --info-soft:#14312a;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35);
+  }
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  html { background: var(--ground); }
+  body { margin:0; background:var(--ground); color:var(--ink); font-family:var(--font-sans); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width: 1180px; margin:0 auto; padding: 0 20px 80px; }
+  .eyebrow { font-family:var(--font-mono); font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  h1 { font-family:var(--font-display); font-weight:700; font-size:clamp(22px,3.2vw,32px); letter-spacing:-.01em; margin:10px 0 0; text-wrap:balance; }
+  h2 { font-family:var(--font-display); font-weight:700; font-size:18px; margin:0; }
+  p { margin:0 0 10px; }
+  .tnum { font-variant-numeric: tabular-nums; }
+
+  header.top { position:sticky; top:0; z-index:30; background:color-mix(in srgb,var(--ground) 90%,transparent); backdrop-filter:saturate(1.4) blur(8px); border-bottom:1px solid var(--line); }
+  .topinner { max-width:1180px; margin:0 auto; padding:11px 20px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  .brandmark { font-family:var(--font-mono); font-size:12px; letter-spacing:.04em; color:var(--ink-2); font-weight:600; }
+  .brandmark b { color:var(--accent); }
+
+  .hero { padding:28px 0 18px; }
+  .lead { font-size:14.5px; color:var(--ink-2); max-width:80ch; }
+  .footprint { margin-top:16px; display:flex; gap:10px 18px; flex-wrap:wrap; align-items:baseline; padding:14px 16px; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:10px; box-shadow:var(--shadow); }
+  .footprint span { font-size:13px; color:var(--ink-2); font-variant-numeric:tabular-nums; }
+  .footprint span b { color:var(--ink); font-weight:700; font-size:15px; }
+  .footprint .fp-lab { width:100%; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--accent-deep); font-weight:600; margin-bottom:2px; }
+
+  /* control bar / chips */
+  .controlbar { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; box-shadow:var(--shadow); margin-bottom:22px; }
+  .cb-label { font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-2); font-weight:600; margin-bottom:10px; }
+  .entchips { display:flex; gap:8px; flex-wrap:wrap; }
+  .entchip { font-family:var(--font-sans); font-size:13px; font-weight:600; border:1px solid var(--line-strong); background:var(--panel); color:var(--ink-2); border-radius:9px; padding:8px 14px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; transition:all .12s; }
+  .entchip .tick { width:15px; height:15px; border-radius:4px; border:1.5px solid var(--line-strong); display:inline-grid; place-items:center; font-size:10px; color:#fff; flex-shrink:0; }
+  .entchip[aria-pressed="true"] { border-color:var(--accent); background:var(--accent-soft); color:var(--accent-deep); }
+  .entchip[aria-pressed="true"] .tick { background:var(--accent); border-color:var(--accent); }
+  .entchip[aria-pressed="true"] .tick::after { content:"\2713"; }
+  .entchip .gprog { font-family:var(--font-mono); font-size:10.5px; color:var(--muted); font-weight:600; }
+  .entchip[aria-pressed="true"] .gprog { color:var(--accent-deep); }
+
+  .col-h { display:flex; align-items:baseline; gap:10px; margin-bottom:12px; flex-wrap:wrap; }
+  .col-h .n { font-family:var(--font-mono); font-size:11px; color:var(--accent); font-weight:600; }
+  .col-h p { margin:0; font-size:12px; color:var(--muted); }
+
+  /* table */
+  .tablewrap { overflow-x:auto; border:1px solid var(--line); border-radius:12px; background:var(--panel); box-shadow:var(--shadow); }
+  table.lvtable { width:100%; border-collapse:collapse; font-size:13px; min-width:640px; }
+  .lvtable th { text-align:left; font-family:var(--font-mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; padding:10px 12px; border-bottom:1px solid var(--line-strong); background:var(--panel-2); white-space:nowrap; }
+  .lvtable td { padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:top; color:var(--ink-2); }
+  .lvtable tr:last-child td { border-bottom:none; }
+  .lvtable tbody tr.rowlink { cursor:pointer; }
+  .lvtable tbody tr.rowlink:hover td { background:var(--accent-soft); }
+  .lvid { font-family:var(--font-mono); font-weight:700; color:var(--accent-deep); font-size:12px; white-space:nowrap; }
+  .lvtitle { color:var(--ink); font-weight:600; font-size:13px; }
+
+  .statuspill { font-family:var(--font-mono); font-size:9.5px; font-weight:700; padding:2px 7px; border-radius:6px; letter-spacing:.03em; white-space:nowrap; display:inline-block; }
+  .statuspill.open { background:var(--high-soft); color:var(--high); }
+  .statuspill.conforming { background:var(--accent-soft); color:var(--accent-deep); }
+  .statuspill.partner-decision { background:var(--crit-soft); color:var(--crit); }
+
+  .progresswrap { display:flex; align-items:center; gap:8px; }
+  .pbar { width:60px; height:6px; border-radius:4px; background:var(--panel-2); overflow:hidden; flex-shrink:0; border:1px solid var(--line); }
+  .pbar > i { display:block; height:100%; background:var(--accent); }
+  .ptext { font-family:var(--font-mono); font-size:11px; color:var(--ink-2); white-space:nowrap; }
+  .ptext.full { color:var(--accent-deep); font-weight:700; }
+
+  .dchip { font-family:var(--font-mono); font-size:9.5px; font-weight:700; padding:2px 6px; border-radius:5px; letter-spacing:.02em; background:var(--panel-2); color:var(--ink-2); white-space:nowrap; }
+  .lic { font-family:var(--font-mono); font-size:9.5px; letter-spacing:.04em; color:var(--muted); border:1px solid var(--line); border-radius:5px; padding:2px 6px; display:inline-block; margin:2px 4px 0 0; }
+
+  /* back / breadcrumb */
+  .backbtn { font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--accent-deep); background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line)); border-radius:8px; padding:7px 12px; cursor:pointer; margin-bottom:16px; display:inline-flex; align-items:center; gap:6px; }
+  .backbtn:hover { background:color-mix(in srgb,var(--accent-soft) 70%, var(--accent) 12%); }
+
+  /* lever detail head card */
+  .plancard { background:var(--panel); border:1px solid var(--line); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px; }
+  .planhead { padding:16px 18px; border-bottom:1px solid var(--line); background:linear-gradient(180deg,var(--accent-soft),transparent); }
+  .planhead .ptitle { font-family:var(--font-display); font-weight:700; font-size:19px; text-wrap:balance; }
+  .planhead .psub { font-size:12px; color:var(--ink-2); margin-top:6px; display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .stat3 { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; padding:14px 18px; border-bottom:1px solid var(--line); }
+  .stat3 .s .n { font-size:24px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+  .stat3 .s .k { font-size:10.5px; color:var(--muted); margin-top:5px; line-height:1.3; }
+  .stat3 .s.crit .n { color:var(--crit); }
+  .stat3 .s.high .n { color:var(--high); }
+  .stat3 .s.accent .n { color:var(--accent-deep); }
+  .detailbody { padding:6px 18px 18px; }
+  .detailbody h4 { font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-2); font-weight:600; margin:20px 0 10px; display:flex; align-items:center; gap:8px; }
+  .detailbody h4 .cnt { color:var(--muted); font-weight:600; }
+  .detailbody h4.verified { color:var(--accent-deep); }
+  .detailbody h4.todo { color:var(--info); }
+  .detailbody h4.partner { color:var(--high); }
+
+  /* checklist items */
+  .checkitem { display:flex; gap:11px; align-items:flex-start; padding:11px 13px; background:var(--panel); border:1px solid var(--line); border-radius:9px; margin-bottom:8px; box-shadow:var(--shadow); }
+  .checkitem input[type=checkbox] { margin-top:2px; width:16px; height:16px; accent-color:var(--accent); flex-shrink:0; cursor:pointer; }
+  .checkitem.verified { border-left:3px solid var(--accent); }
+  .checkitem.verified input { cursor:default; }
+  .checkitem.todo { border-left:3px solid var(--info); }
+  .checkitem.partner { border-left:3px solid var(--high); background:var(--high-soft); }
+  .checkitem .citext { font-size:13px; color:var(--ink); line-height:1.45; flex:1; min-width:0; }
+  .checkitem.done .citext { text-decoration:line-through; color:var(--muted); }
+  .checkitem .cisrc { font-family:var(--font-mono); font-size:10.5px; color:var(--accent-deep); margin-top:5px; display:block; }
+  .checkitem .ciref { font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:5px; display:block; word-break:break-word; }
+  .empty { font-size:12.5px; color:var(--muted); padding:14px; text-align:center; border:1px dashed var(--line-strong); border-radius:9px; }
+
+  .copybtn { font-family:var(--font-mono); font-size:11px; font-weight:600; color:var(--accent-deep); background:var(--accent-soft); border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line)); border-radius:8px; padding:8px 14px; cursor:pointer; }
+  .copybtn:hover { background:color-mix(in srgb,var(--accent-soft) 70%, var(--accent) 12%); }
+  .copybtn.ghost { background:var(--panel); }
+
+  .exportbar { margin-top:26px; padding:14px 16px; background:var(--panel); border:1px solid var(--line); border-radius:10px; box-shadow:var(--shadow); display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap; }
+  .exportnote { font-size:11.5px; color:var(--muted); line-height:1.5; flex:1; min-width:240px; }
+
+  footer { margin-top:36px; padding-top:18px; border-top:1px solid var(--line); font-family:var(--font-mono); font-size:10.5px; color:var(--muted); line-height:1.7; }
+  .legend2 { display:flex; gap:16px; flex-wrap:wrap; font-family:var(--font-mono); font-size:10px; color:var(--muted); margin-top:10px; }
+  .legend2 b { color:var(--ink-2); font-weight:600; }
+  a { color:var(--accent); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  @media (max-width: 640px) {
+    .stat3 { grid-template-columns:1fr; }
+    .lvtable { font-size:12px; }
+  }
+</style>
+
+<header class="top">
+  <div class="topinner">
+    <span class="brandmark">REDWOOD SERVICES · <b>Sierra — Lever Console</b> · data 2026-07-24 · design language: Brooke Ramsey's Feature Gate</span>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Company Overview Project · GS Tightening Walk</div>
+    <h1>Sierra's lever walk — grouped, checkable, exportable</h1>
+    <p class="lead">Every lever from the 2026-07-24 punch-list refresh, organized into 9 groups. Drill into a group, then a lever, and check off items as you walk them live in ServiceTitan. Verified items are locked in from data — you only ever check the ones that need a hand.</p>
+    <div class="footprint" id="footprint"></div>
+  </div>
+
+  <div class="controlbar">
+    <div class="cb-label">Groups</div>
+    <div class="entchips" id="groupchips"></div>
+  </div>
+
+  <div class="col-h"><span class="n" id="viewlabel">ALL LEVERS</span><p id="viewsub"></p></div>
+  <div id="content"></div>
+
+  <div class="exportbar">
+    <button class="copybtn" id="exportbtn">Export progress</button>
+    <div class="exportnote">Walk state is per-browser; production state lives in the Domo app (Brooke). Export + paste to Claude to sync.</div>
+  </div>
+
+  <footer>
+    <div>Sierra lever console · built from the 2026-07-24 GS Tightening Walk punch-list refresh. The machine-readable data island below (<code>#console-data</code>) is what Brooke's Claude syncs from — byte-identical to <code>console_data.json</code>.</div>
+    <div class="legend2">
+      <span><b>✅ Verified from data</b> — confirmed live, locked in</span>
+      <span><b>⬜ Do this</b> — action to take, check off as completed</span>
+      <span><b>❓ Needs Partner</b> — open decision or unresolved question</span>
+      <span><b>Progress</b> — counted across all three kinds, per lever</span>
+    </div>
+  </footer>
+</div>
+
+<script type="application/json" id="console-data">
+{
+ "partner": "Sierra",
+ "tenant": "1066404518",
+ "generated": "2026-07-24",
+ "groups": [
+  {
+   "id": "tags",
+   "label": "Tags",
+   "levers": [
+    "TAG-1",
+    "TAG-2",
+    "TAG-3",
+    "TAG-5",
+    "TAG-6",
+    "XT-1"
+   ]
+  },
+  {
+   "id": "job_types",
+   "label": "Job Types",
+   "levers": [
+    "JTC-5",
+    "JTC-6",
+    "JTC-7",
+    "JTC-8",
+    "JTC-9",
+    "JTC-10",
+    "JTC-11"
+   ]
+  },
+  {
+   "id": "workflows",
+   "label": "Workflows",
+   "levers": [
+    "WF-1",
+    "SOP-3",
+    "SOP-6"
+   ]
+  },
+  {
+   "id": "sops",
+   "label": "SOPs",
+   "levers": [
+    "SOP-3",
+    "SOP-6"
+   ]
+  },
+  {
+   "id": "memberships",
+   "label": "Memberships",
+   "levers": [
+    "MEM-1",
+    "MEM-2",
+    "MEM-3"
+   ]
+  },
+  {
+   "id": "staffing",
+   "label": "Staffing",
+   "levers": [
+    "STF-1",
+    "STF-2"
+   ]
+  },
+  {
+   "id": "business_units",
+   "label": "Business Units",
+   "levers": [
+    "BU-1",
+    "BU-2",
+    "BU-3",
+    "BU-4",
+    "BU-5",
+    "BU-6",
+    "BU-7",
+    "BU-8",
+    "BU-9",
+    "BU-10"
+   ]
+  },
+  {
+   "id": "equipment",
+   "label": "Equipment",
+   "levers": [
+    "EQ-1",
+    "EQ-2",
+    "EQ-3",
+    "EQ-4"
+   ]
+  },
+  {
+   "id": "campaigns",
+   "label": "Campaigns",
+   "levers": [
+    "CAMP-1"
+   ]
+  }
+ ],
+ "levers": [
+  {
+   "id": "TAG-1",
+   "group": "tags",
+   "title": "Rename `ROPP` (962027) -> `OPP: 8+ HVAC`",
+   "status": "open",
+   "bu": "HVAC",
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "TAG-1-1",
+     "kind": "todo",
+     "text": "Rename tag 'ROPP' (ID 962027) -> 'OPP: 8+ HVAC' (ID-preserving rename; keeps all existing job-type auto-apply wiring intact)",
+     "ref": {
+      "entity_id": 962027,
+      "current": "ROPP",
+      "target": "OPP: 8+ HVAC"
+     }
+    },
+    {
+     "id": "TAG-1-2",
+     "kind": "verified",
+     "text": "Tag 962027 ('ROPP') confirmed active in discover.json today.",
+     "ref": {
+      "entity_id": 962027,
+      "current": true
+     }
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "TAG-2",
+   "group": "tags",
+   "title": "Rename `Whole House ROPP PLMB` (540754592) -> `OPP: Whole House Repipe`",
+   "status": "open",
+   "bu": "Plumbing",
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "TAG-2-1",
+     "kind": "todo",
+     "text": "Rename tag 'Whole House ROPP PLMB' (ID 540754592) -> 'OPP: Whole House Repipe' (ID-preserving; 0 active job-type auto-applies today, manual-apply only)",
+     "ref": {
+      "entity_id": 540754592,
+      "current": "Whole House ROPP PLMB",
+      "target": "OPP: Whole House Repipe"
+     }
+    },
+    {
+     "id": "TAG-2-2",
+     "kind": "verified",
+     "text": "Tag 540754592 ('Whole House ROPP PLMB') confirmed active in discover.json today.",
+     "ref": {
+      "entity_id": 540754592,
+      "current": true
+     }
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "TAG-3",
+   "group": "tags",
+   "title": "Add GS-keyed OPP: tags for Sierra's engaged trades (+ TROP rename-vs-add fork)",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "TAG-3-1",
+     "kind": "todo",
+     "text": "Add new tag 'OPP: Electric Water Heater' (isConversionOpportunity=true, isVisibleOnDispatchBoard=true from creation)",
+     "ref": {
+      "target": "OPP: Electric Water Heater"
+     }
+    },
+    {
+     "id": "TAG-3-2",
+     "kind": "todo",
+     "text": "Add new tag 'OPP: Water Treatment' (isConversionOpportunity=true, isVisibleOnDispatchBoard=true from creation)",
+     "ref": {
+      "target": "OPP: Water Treatment"
+     }
+    },
+    {
+     "id": "TAG-3-3",
+     "kind": "todo",
+     "text": "Add new tag 'OPP: Drain' (isConversionOpportunity=true, isVisibleOnDispatchBoard=true from creation) \u2014 land in the same change window as the BU-3 Sewer - Service rename",
+     "ref": {
+      "target": "OPP: Drain"
+     }
+    },
+    {
+     "id": "TAG-3-4",
+     "kind": "partner",
+     "text": "TROP fork (decide before executing): (A) rename tag 'TROP' (ID 396774589) -> 'OPP: 6+ Tankless', inheriting its 6 live job-type wirings for free, vs (B) keep TROP as a legacy tag to retire/merge later and create fresh 'OPP: 8+ Tankless' / 'OPP: 15+ Tankless' tags with net-new wiring",
+     "ref": {
+      "entity_id": 396774589,
+      "current": "TROP"
+     }
+    },
+    {
+     "id": "TAG-3-5",
+     "kind": "verified",
+     "text": "Tag 396774589 not found in discover.json.",
+     "ref": {
+      "entity_id": 396774589,
+      "current": null
+     }
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "TAG-5",
+   "group": "tags",
+   "title": "B2 \u2014 Clear isConversionOpportunity stray flags on non-GS tags",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "TAG-5-1",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'ROPP' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "ROPP",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-2",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'VIP' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "VIP",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-3",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'Costco Member' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "Costco Member",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-4",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'No Cool' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "No Cool",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-5",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'No Heat' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "No Heat",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-6",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'Noisy Unit' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "Noisy Unit",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-7",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'SAM COMMERCIAL ' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "SAM COMMERCIAL ",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-8",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'TROP' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "TROP",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-9",
+     "kind": "todo",
+     "text": "Clear isConversionOpportunity on non-GS tag 'ROPP Sierra Comfort Control T-Stat' (low severity) \u2014 isConversionOpportunity TRUE on a non-GS tag (cleanup lever)",
+     "ref": {
+      "entity_id": "ROPP Sierra Comfort Control T-Stat",
+      "current": true,
+      "target": false
+     }
+    },
+    {
+     "id": "TAG-5-10",
+     "kind": "verified",
+     "text": "9 non-GS tags carry isConversionOpportunity=TRUE at Sierra today (findings-003-sierra-2026-07-24.json, check=CONV-STRAY-FLAG).",
+     "ref": {
+      "current": 9
+     }
+    }
+   ],
+   "source_files": [
+    "findings-003-sierra-2026-07-24.json"
+   ]
+  },
+  {
+   "id": "TAG-6",
+   "group": "tags",
+   "title": "Add missing GS member tag: `Potential Membership Renewal`",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "TAG-6-1",
+     "kind": "todo",
+     "text": "Create new tag type 'Potential Membership Renewal' (isConversionOpportunity=true) \u2014 completely absent from Sierra's tag table today",
+     "ref": {
+      "target": "Potential Membership Renewal"
+     }
+    },
+    {
+     "id": "TAG-6-2",
+     "kind": "verified",
+     "text": "Sierra's tag catalog carries 150 active tag types today (discover.json -> tag_types.catalog_count); zero matches for 'Potential Membership Renewal' by name.",
+     "ref": {
+      "current": 150
+     }
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "XT-1",
+   "group": "tags",
+   "title": "Confirm no legacy XT: tag namespace exists at Sierra",
+   "status": "partner-decision",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "XT-1-1",
+     "kind": "partner",
+     "text": "Confirm live in ST: Settings > Tags > search 'XT:' \u2014 expected 0 results at Sierra today; currently an unverified claim (no local query has confirmed it).",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "model-tenant/gs-tightening-walk/2026-07-24-sierra-walk-capture.md"
+   ]
+  },
+  {
+   "id": "JTC-5",
+   "group": "job_types",
+   "title": "C/W family (Callback / Warranty, future Recall + Warranty) + Non-Opportunity on SERVICE BUs \u2014 Sold Threshold -> $1",
+   "status": "open",
+   "bu": "SERVICE BUs",
+   "job_type_scope": [
+    312988778,
+    340303923,
+    401822440,
+    401822978,
+    531077950,
+    565520562
+   ],
+   "class_scope": [
+    "Callback / Warranty",
+    "Non-Opportunity"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-5-1",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Recall/Warranty' (ID 401822440): $50 -> $1",
+     "ref": {
+      "entity_id": 401822440,
+      "current": 50.0,
+      "target": 1,
+      "class": "Callback / Warranty",
+      "h1_completed_jobs": 1067
+     }
+    },
+    {
+     "id": "JTC-5-2",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Client Resolution' (ID 401822978): $50 -> $1",
+     "ref": {
+      "entity_id": 401822978,
+      "current": 50.0,
+      "target": 1,
+      "class": "Callback / Warranty",
+      "h1_completed_jobs": 21
+     }
+    },
+    {
+     "id": "JTC-5-3",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Drive By' (ID 565520562): $50 -> $1",
+     "ref": {
+      "entity_id": 565520562,
+      "current": 50.0,
+      "target": 1,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 10
+     }
+    },
+    {
+     "id": "JTC-5-4",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Finish Job' (ID 340303923): $50 -> $1",
+     "ref": {
+      "entity_id": 340303923,
+      "current": 50.0,
+      "target": 1,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-5-5",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Retro Finish' (ID 312988778): $50 -> $1",
+     "ref": {
+      "entity_id": 312988778,
+      "current": 50.0,
+      "target": 1,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-5-6",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Job Walk' (ID 531077950): $50 -> $1",
+     "ref": {
+      "entity_id": 531077950,
+      "current": 50.0,
+      "target": 1,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-5-7",
+     "kind": "verified",
+     "text": "6 of 6 matched job types violate the GS $1 threshold on 'C/W family (Callback / Warranty, future Recall + Warranty) + Non-Opportunity on SERVICE BUs' today (census_results.json -> threshold_audit[2]).",
+     "ref": {
+      "current": 6,
+      "target": 6
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "JTC-6",
+   "group": "job_types",
+   "title": "Non-Opportunity on SALES BUs \u2014 Sold Threshold -> $999,999",
+   "status": "conforming",
+   "bu": "SALES BUs",
+   "job_type_scope": [],
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-6-1",
+     "kind": "verified",
+     "text": "'Non-Opportunity on SALES BUs': 0 matched job types, 0 conforming / 0 violating vs the $999,999 GS target \u2014 no action needed today (census_results.json -> threshold_audit[3]).",
+     "ref": {
+      "current": 0,
+      "target": 0
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "JTC-7",
+   "group": "job_types",
+   "title": "EVERY job type on an INSTALL BU \u2014 Sold Threshold -> $999,999",
+   "status": "open",
+   "bu": "an INSTALL BU",
+   "job_type_scope": {
+    "count": 78,
+    "note": "see items[].ref.entity_id"
+   },
+   "class_scope": [
+    "Callback / Warranty",
+    "Demand",
+    "Install",
+    "Non-Opportunity",
+    "Return to Complete Repair"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-7-1",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Recall/Warranty' (ID 401822440): $50 -> $999,999",
+     "ref": {
+      "entity_id": 401822440,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Callback / Warranty",
+      "h1_completed_jobs": 918
+     }
+    },
+    {
+     "id": "JTC-7-2",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Quality Assurance' (ID 847034): $50 -> $999,999",
+     "ref": {
+      "entity_id": 847034,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 859
+     }
+    },
+    {
+     "id": "JTC-7-3",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Part Install 3-5 HRS' (ID 340293530): $50 -> $999,999",
+     "ref": {
+      "entity_id": 340293530,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 545
+     }
+    },
+    {
+     "id": "JTC-7-4",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Finish Job' (ID 340303923): $50 -> $999,999",
+     "ref": {
+      "entity_id": 340303923,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 484
+     }
+    },
+    {
+     "id": "JTC-7-5",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Sierra Drywall' (ID 371141690): $50 -> $999,999",
+     "ref": {
+      "entity_id": 371141690,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 353
+     }
+    },
+    {
+     "id": "JTC-7-6",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'QA Crew Check' (ID 628873748): $50 -> $999,999",
+     "ref": {
+      "entity_id": 628873748,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 299
+     }
+    },
+    {
+     "id": "JTC-7-7",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Horizontal TGL' (ID 315667260): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315667260,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 278
+     }
+    },
+    {
+     "id": "JTC-7-8",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Permit Inspection' (ID 336299644): $100 -> $999,999",
+     "ref": {
+      "entity_id": 336299644,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 268
+     }
+    },
+    {
+     "id": "JTC-7-9",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Tanked Water Heater' (ID 365): $100 -> $999,999",
+     "ref": {
+      "entity_id": 365,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 235
+     }
+    },
+    {
+     "id": "JTC-7-10",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Water Softener/Filtration/Reverse Osmosis' (ID 316180922): $100 -> $999,999",
+     "ref": {
+      "entity_id": 316180922,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 186
+     }
+    },
+    {
+     "id": "JTC-7-11",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Retro Finish' (ID 312988778): $50 -> $999,999",
+     "ref": {
+      "entity_id": 312988778,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 174
+     }
+    },
+    {
+     "id": "JTC-7-12",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Horizontal (Costco)' (ID 315674301): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315674301,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 149
+     }
+    },
+    {
+     "id": "JTC-7-13",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 1-2 HRS' (ID 315559748): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315559748,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 144
+     }
+    },
+    {
+     "id": "JTC-7-14",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Tankless Water Heater' (ID 336296486): $100 -> $999,999",
+     "ref": {
+      "entity_id": 336296486,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 128
+     }
+    },
+    {
+     "id": "JTC-7-15",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 4-5 HRS' (ID 318759150): $100 -> $999,999",
+     "ref": {
+      "entity_id": 318759150,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 99
+     }
+    },
+    {
+     "id": "JTC-7-16",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Job Walk' (ID 531077950): $50 -> $999,999",
+     "ref": {
+      "entity_id": 531077950,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 69
+     }
+    },
+    {
+     "id": "JTC-7-17",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Horizontal TGL' (ID 315681338): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315681338,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 53
+     }
+    },
+    {
+     "id": "JTC-7-18",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Horizontal' (ID 202652492): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202652492,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 50
+     }
+    },
+    {
+     "id": "JTC-7-19",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Package Unit TGL' (ID 315679930): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315679930,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 41
+     }
+    },
+    {
+     "id": "JTC-7-20",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Package Unit (Costco)' (ID 315688890): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315688890,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 30
+     }
+    },
+    {
+     "id": "JTC-7-21",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Duct System 3.5-5.0 Tons TGL' (ID 315674171): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315674171,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 25
+     }
+    },
+    {
+     "id": "JTC-7-22",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Horizontal (Costco)' (ID 315683898): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315683898,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 21
+     }
+    },
+    {
+     "id": "JTC-7-23",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Duct System 3.5-5.0 Tons' (ID 202797385): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202797385,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 18
+     }
+    },
+    {
+     "id": "JTC-7-24",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Main Water Line' (ID 360136262): $100 -> $999,999",
+     "ref": {
+      "entity_id": 360136262,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-7-25",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Furnace TGL' (ID 315665086): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315665086,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-7-26",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Upflow/Downflow TGL' (ID 315673149): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315673149,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-7-27",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Toilet' (ID 455501016): $100 -> $999,999",
+     "ref": {
+      "entity_id": 455501016,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 16
+     }
+    },
+    {
+     "id": "JTC-7-28",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Hook up Aquatherm' (ID 358982109): $50 -> $999,999",
+     "ref": {
+      "entity_id": 358982109,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 15
+     }
+    },
+    {
+     "id": "JTC-7-29",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Heat Pump Horizontal TGL' (ID 315676221): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315676221,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 14
+     }
+    },
+    {
+     "id": "JTC-7-30",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Temp Water Heater' (ID 349956497): $100 -> $999,999",
+     "ref": {
+      "entity_id": 349956497,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 12
+     }
+    },
+    {
+     "id": "JTC-7-31",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Aquatherm TGL' (ID 315677242): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315677242,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 12
+     }
+    },
+    {
+     "id": "JTC-7-32",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Gas Line' (ID 336327188): $100 -> $999,999",
+     "ref": {
+      "entity_id": 336327188,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 10
+     }
+    },
+    {
+     "id": "JTC-7-33",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Upflow/Downflow (Costco)' (ID 315683514): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315683514,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 9
+     }
+    },
+    {
+     "id": "JTC-7-34",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Package Unit' (ID 850618): $100 -> $999,999",
+     "ref": {
+      "entity_id": 850618,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 9
+     }
+    },
+    {
+     "id": "JTC-7-35",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Heat Pump Horizontal (Costco)' (ID 315682746): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315682746,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 8
+     }
+    },
+    {
+     "id": "JTC-7-36",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Retro Demo' (ID 316181050): $50 -> $999,999",
+     "ref": {
+      "entity_id": 316181050,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Non-Opportunity",
+      "h1_completed_jobs": 8
+     }
+    },
+    {
+     "id": "JTC-7-37",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Whole Home Repipe' (ID 404267054): $100 -> $999,999",
+     "ref": {
+      "entity_id": 404267054,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 7
+     }
+    },
+    {
+     "id": "JTC-7-38",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Upflow/Downflow' (ID 202654795): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202654795,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 7
+     }
+    },
+    {
+     "id": "JTC-7-39",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Humidifier' (ID 381488809): $100 -> $999,999",
+     "ref": {
+      "entity_id": 381488809,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-7-40",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Pancake Unit (Costco)' (ID 315684543): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315684543,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-7-41",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Duct System Up To 3 Tons TGL' (ID 315676091): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315676091,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-7-42",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Upflow/Downflow TGL' (ID 315681594): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315681594,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-7-43",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Mini Split' (ID 851130): $100 -> $999,999",
+     "ref": {
+      "entity_id": 851130,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-7-44",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Condenser' (ID 342): $100 -> $999,999",
+     "ref": {
+      "entity_id": 342,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-7-45",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Pancake Unit TGL' (ID 315674072): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315674072,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-46",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Client Resolution' (ID 401822978): $50 -> $999,999",
+     "ref": {
+      "entity_id": 401822978,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Callback / Warranty",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-47",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Aquatherm' (ID 308025757): $100 -> $999,999",
+     "ref": {
+      "entity_id": 308025757,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-48",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Water Softener/Conditioner/Filtration/RO' (ID 408024097): $100 -> $999,999",
+     "ref": {
+      "entity_id": 408024097,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-49",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Horizontal' (ID 202654541): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202654541,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-50",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Mini Split (Costco)' (ID 315686970): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315686970,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-7-51",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Condenser/Coil TGL' (ID 361919685): $100 -> $999,999",
+     "ref": {
+      "entity_id": 361919685,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-7-52",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Leak Other/Unknown Origin' (ID 362): $100 -> $999,999",
+     "ref": {
+      "entity_id": 362,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-7-53",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Trenched Sewer Replacement' (ID 362760173): $100 -> $999,999",
+     "ref": {
+      "entity_id": 362760173,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-7-54",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Furnace (Costco)' (ID 315677632): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315677632,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-7-55",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Bathtub/Shower' (ID 455500631): $100 -> $999,999",
+     "ref": {
+      "entity_id": 455500631,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-7-56",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Duct System Up To 3 Tons' (ID 850874): $100 -> $999,999",
+     "ref": {
+      "entity_id": 850874,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-57",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Garbage Disposal' (ID 455497133): $100 -> $999,999",
+     "ref": {
+      "entity_id": 455497133,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-58",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Upflow/Downflow (Costco)' (ID 315664699): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315664699,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-59",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 80% Furnace' (ID 849343): $50 -> $999,999",
+     "ref": {
+      "entity_id": 849343,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-60",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Upflow/Downflow' (ID 202654666): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202654666,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-61",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'AC Issue 1-3 yrs' (ID 202711625): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202711625,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-62",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'AC Issue 4-7 yrs' (ID 400227778): $100 -> $999,999",
+     "ref": {
+      "entity_id": 400227778,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-63",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Condenser/Coil' (ID 458573303): $100 -> $999,999",
+     "ref": {
+      "entity_id": 458573303,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-64",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Pancake Unit' (ID 202656462): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202656462,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-65",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Furnace (Costco)' (ID 632900954): $100 -> $999,999",
+     "ref": {
+      "entity_id": 632900954,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-66",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Sump Pump and Barrel' (ID 455490306): $100 -> $999,999",
+     "ref": {
+      "entity_id": 455490306,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-7-67",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Jetter' (ID 369700400): $100 -> $999,999",
+     "ref": {
+      "entity_id": 369700400,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-68",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Heat Pump Horizontal' (ID 202652106): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202652106,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-69",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Humidifier TGL' (ID 389075471): $100 -> $999,999",
+     "ref": {
+      "entity_id": 389075471,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-70",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Condenser (Costco)' (ID 315685946): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315685946,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-71",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Aquatherm (Costco)' (ID 315674939): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315674939,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-72",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Heat Pump Upflow/Downflow (Costco)' (ID 315686842): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315686842,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-73",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Thermostat Issue' (ID 202912641): $100 -> $999,999",
+     "ref": {
+      "entity_id": 202912641,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-74",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install 90% Furnace TGL' (ID 632901279): $100 -> $999,999",
+     "ref": {
+      "entity_id": 632901279,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-75",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Install Kitchen Sink' (ID 455503565): $100 -> $999,999",
+     "ref": {
+      "entity_id": 455503565,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-76",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Mini Split TGL' (ID 315679674): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315679674,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-77",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Water Test/Treatment' (ID 359388734): $100 -> $999,999",
+     "ref": {
+      "entity_id": 359388734,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Demand",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-78",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install Condenser TGL' (ID 315677371): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315677371,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-7-79",
+     "kind": "verified",
+     "text": "78 of 78 matched job types violate the GS $999,999 threshold on 'EVERY job type on an INSTALL BU' today (census_results.json -> threshold_audit[4]).",
+     "ref": {
+      "current": 78,
+      "target": 78
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "JTC-8",
+   "group": "job_types",
+   "title": "Set noCharge flag to match GS class default (J4)",
+   "status": "open",
+   "bu": "any",
+   "job_type_scope": {
+    "count": 99,
+    "note": "see items[].ref.entity_id"
+   },
+   "class_scope": [
+    "Demand",
+    "Estimate",
+    "Install",
+    "Return to Complete Repair"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-8-1",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install HVAC Part 1-2 HRS' (ID 315559748): False -> True",
+     "ref": {
+      "entity_id": 315559748,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 757
+     }
+    },
+    {
+     "id": "JTC-8-2",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Part Install 3-5 HRS' (ID 340293530): False -> True",
+     "ref": {
+      "entity_id": 340293530,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 688
+     }
+    },
+    {
+     "id": "JTC-8-3",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install HVAC Part 4-5 HRS' (ID 318759150): False -> True",
+     "ref": {
+      "entity_id": 318759150,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 454
+     }
+    },
+    {
+     "id": "JTC-8-4",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Horizontal TGL' (ID 315667260): False -> True",
+     "ref": {
+      "entity_id": 315667260,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 278
+     }
+    },
+    {
+     "id": "JTC-8-5",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Tanked Water Heater' (ID 365): False -> True",
+     "ref": {
+      "entity_id": 365,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 235
+     }
+    },
+    {
+     "id": "JTC-8-6",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Water Softener/Filtration/Reverse Osmosis' (ID 316180922): False -> True",
+     "ref": {
+      "entity_id": 316180922,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 187
+     }
+    },
+    {
+     "id": "JTC-8-7",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Horizontal (Costco)' (ID 315674301): False -> True",
+     "ref": {
+      "entity_id": 315674301,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 149
+     }
+    },
+    {
+     "id": "JTC-8-8",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Tankless Water Heater' (ID 336296486): False -> True",
+     "ref": {
+      "entity_id": 336296486,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 128
+     }
+    },
+    {
+     "id": "JTC-8-9",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Horizontal TGL' (ID 315681338): False -> True",
+     "ref": {
+      "entity_id": 315681338,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 53
+     }
+    },
+    {
+     "id": "JTC-8-10",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Horizontal' (ID 202652492): False -> True",
+     "ref": {
+      "entity_id": 202652492,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 50
+     }
+    },
+    {
+     "id": "JTC-8-11",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Jetter' (ID 369700400): False -> True",
+     "ref": {
+      "entity_id": 369700400,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 42
+     }
+    },
+    {
+     "id": "JTC-8-12",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Package Unit TGL' (ID 315679930): False -> True",
+     "ref": {
+      "entity_id": 315679930,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 41
+     }
+    },
+    {
+     "id": "JTC-8-13",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Package Unit (Costco)' (ID 315688890): False -> True",
+     "ref": {
+      "entity_id": 315688890,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 30
+     }
+    },
+    {
+     "id": "JTC-8-14",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Duct System 3.5-5.0 Tons TGL' (ID 315674171): False -> True",
+     "ref": {
+      "entity_id": 315674171,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 25
+     }
+    },
+    {
+     "id": "JTC-8-15",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Horizontal (Costco)' (ID 315683898): False -> True",
+     "ref": {
+      "entity_id": 315683898,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 21
+     }
+    },
+    {
+     "id": "JTC-8-16",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Duct System 3.5-5.0 Tons' (ID 202797385): False -> True",
+     "ref": {
+      "entity_id": 202797385,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 18
+     }
+    },
+    {
+     "id": "JTC-8-17",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Furnace TGL' (ID 315665086): False -> True",
+     "ref": {
+      "entity_id": 315665086,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-8-18",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Upflow/Downflow TGL' (ID 315673149): False -> True",
+     "ref": {
+      "entity_id": 315673149,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-8-19",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Main Water Line' (ID 360136262): False -> True",
+     "ref": {
+      "entity_id": 360136262,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-8-20",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Toilet' (ID 455501016): False -> True",
+     "ref": {
+      "entity_id": 455501016,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 16
+     }
+    },
+    {
+     "id": "JTC-8-21",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Horizontal TGL' (ID 315676221): False -> True",
+     "ref": {
+      "entity_id": 315676221,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 14
+     }
+    },
+    {
+     "id": "JTC-8-22",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Aquatherm TGL' (ID 315677242): False -> True",
+     "ref": {
+      "entity_id": 315677242,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 12
+     }
+    },
+    {
+     "id": "JTC-8-23",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Temp Water Heater' (ID 349956497): False -> True",
+     "ref": {
+      "entity_id": 349956497,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 12
+     }
+    },
+    {
+     "id": "JTC-8-24",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Estimate Whole Home Repipe' (ID 369294266): True -> False",
+     "ref": {
+      "entity_id": 369294266,
+      "current": true,
+      "target": false,
+      "class": "Estimate",
+      "h1_completed_jobs": 11
+     }
+    },
+    {
+     "id": "JTC-8-25",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Gas Line' (ID 336327188): False -> True",
+     "ref": {
+      "entity_id": 336327188,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 10
+     }
+    },
+    {
+     "id": "JTC-8-26",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Trenched Sewer Replacement' (ID 362760173): False -> True",
+     "ref": {
+      "entity_id": 362760173,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 10
+     }
+    },
+    {
+     "id": "JTC-8-27",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Upflow/Downflow (Costco)' (ID 315683514): False -> True",
+     "ref": {
+      "entity_id": 315683514,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 9
+     }
+    },
+    {
+     "id": "JTC-8-28",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Package Unit' (ID 850618): False -> True",
+     "ref": {
+      "entity_id": 850618,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 9
+     }
+    },
+    {
+     "id": "JTC-8-29",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Horizontal (Costco)' (ID 315682746): False -> True",
+     "ref": {
+      "entity_id": 315682746,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 8
+     }
+    },
+    {
+     "id": "JTC-8-30",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Upflow/Downflow' (ID 202654795): False -> True",
+     "ref": {
+      "entity_id": 202654795,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 7
+     }
+    },
+    {
+     "id": "JTC-8-31",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Whole Home Repipe' (ID 404267054): False -> True",
+     "ref": {
+      "entity_id": 404267054,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 7
+     }
+    },
+    {
+     "id": "JTC-8-32",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Duct System Up To 3 Tons TGL' (ID 315676091): False -> True",
+     "ref": {
+      "entity_id": 315676091,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-8-33",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Humidifier' (ID 381488809): False -> True",
+     "ref": {
+      "entity_id": 381488809,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-8-34",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Pancake Unit (Costco)' (ID 315684543): False -> True",
+     "ref": {
+      "entity_id": 315684543,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-8-35",
+     "kind": "todo",
+     "text": "Set noCharge on 'Commercial Install HVAC Part' (ID 624531017): False -> True",
+     "ref": {
+      "entity_id": 624531017,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-8-36",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Upflow/Downflow TGL' (ID 315681594): False -> True",
+     "ref": {
+      "entity_id": 315681594,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-8-37",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser' (ID 342): False -> True",
+     "ref": {
+      "entity_id": 342,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-8-38",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Mini Split' (ID 851130): False -> True",
+     "ref": {
+      "entity_id": 851130,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 5
+     }
+    },
+    {
+     "id": "JTC-8-39",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Horizontal' (ID 202654541): False -> True",
+     "ref": {
+      "entity_id": 202654541,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-40",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Aquatherm' (ID 308025757): False -> True",
+     "ref": {
+      "entity_id": 308025757,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-41",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Mini Split (Costco)' (ID 315686970): False -> True",
+     "ref": {
+      "entity_id": 315686970,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-42",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Pancake Unit TGL' (ID 315674072): False -> True",
+     "ref": {
+      "entity_id": 315674072,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-43",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Garbage Disposal' (ID 455497133): False -> True",
+     "ref": {
+      "entity_id": 455497133,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-44",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Thermostat' (ID 400245541): False -> True",
+     "ref": {
+      "entity_id": 400245541,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 4
+     }
+    },
+    {
+     "id": "JTC-8-45",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Furnace (Costco)' (ID 315677632): False -> True",
+     "ref": {
+      "entity_id": 315677632,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-8-46",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser/Coil TGL' (ID 361919685): False -> True",
+     "ref": {
+      "entity_id": 361919685,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-8-47",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Gas Line Inspection' (ID 339264015): True -> False",
+     "ref": {
+      "entity_id": 339264015,
+      "current": true,
+      "target": false,
+      "class": "Demand",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-8-48",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Bathtub/Shower' (ID 455500631): False -> True",
+     "ref": {
+      "entity_id": 455500631,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-8-49",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 80% Furnace' (ID 849343): False -> True",
+     "ref": {
+      "entity_id": 849343,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-50",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Furnace (Costco)' (ID 632900954): False -> True",
+     "ref": {
+      "entity_id": 632900954,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-51",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Upflow/Downflow' (ID 202654666): False -> True",
+     "ref": {
+      "entity_id": 202654666,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-52",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Upflow/Downflow (Costco)' (ID 315664699): False -> True",
+     "ref": {
+      "entity_id": 315664699,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-53",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser/Coil' (ID 458573303): False -> True",
+     "ref": {
+      "entity_id": 458573303,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-54",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Duct System Up To 3 Tons' (ID 850874): False -> True",
+     "ref": {
+      "entity_id": 850874,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-55",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Pancake Unit' (ID 202656462): False -> True",
+     "ref": {
+      "entity_id": 202656462,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-56",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Kitchen Sink' (ID 455503565): False -> True",
+     "ref": {
+      "entity_id": 455503565,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-57",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Sump Pump and Barrel' (ID 455490306): False -> True",
+     "ref": {
+      "entity_id": 455490306,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-8-58",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Furnace TGL' (ID 632901279): False -> True",
+     "ref": {
+      "entity_id": 632901279,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-59",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Aquatherm (Costco)' (ID 315674939): False -> True",
+     "ref": {
+      "entity_id": 315674939,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-60",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser (Costco)' (ID 315685946): False -> True",
+     "ref": {
+      "entity_id": 315685946,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-61",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser TGL' (ID 315677371): False -> True",
+     "ref": {
+      "entity_id": 315677371,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-62",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Horizontal' (ID 202652106): False -> True",
+     "ref": {
+      "entity_id": 202652106,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-63",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Upflow/Downflow (Costco)' (ID 315686842): False -> True",
+     "ref": {
+      "entity_id": 315686842,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-64",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Humidifier TGL' (ID 389075471): False -> True",
+     "ref": {
+      "entity_id": 389075471,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-65",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Mini Split TGL' (ID 315679674): False -> True",
+     "ref": {
+      "entity_id": 315679674,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-66",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Bathroom Sink' (ID 455498600): False -> True",
+     "ref": {
+      "entity_id": 455498600,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-8-67",
+     "kind": "todo",
+     "text": "Set noCharge on 'Commercial Install Cooling/Heating' (ID 624365156): False -> True",
+     "ref": {
+      "entity_id": 624365156,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-68",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install 90% Furnace' (ID 632905370): False -> True",
+     "ref": {
+      "entity_id": 632905370,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-69",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Air Handler' (ID 633736078): False -> True",
+     "ref": {
+      "entity_id": 633736078,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-70",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Air Handler TGL' (ID 633739661): False -> True",
+     "ref": {
+      "entity_id": 633739661,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-71",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Coil' (ID 849344): False -> True",
+     "ref": {
+      "entity_id": 849344,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-72",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Coil (Costco)' (ID 315684808): False -> True",
+     "ref": {
+      "entity_id": 315684808,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-73",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Coil TGL' (ID 315677370): False -> True",
+     "ref": {
+      "entity_id": 315677370,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-74",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Condenser/Coil (Costco)' (ID 371829027): False -> True",
+     "ref": {
+      "entity_id": 371829027,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-75",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Filter Cabinet' (ID 202650319): False -> True",
+     "ref": {
+      "entity_id": 202650319,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-76",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Filter Cabinet TGL' (ID 632904010): False -> True",
+     "ref": {
+      "entity_id": 632904010,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-77",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Upflow/Downflow' (ID 202654922): False -> True",
+     "ref": {
+      "entity_id": 202654922,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-78",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Heat Pump Upflow/Downflow TGL' (ID 315673150): False -> True",
+     "ref": {
+      "entity_id": 315673150,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-79",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install IAQ TGL' (ID 633732880): False -> True",
+     "ref": {
+      "entity_id": 633732880,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-80",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Swamp Cooler' (ID 851386): False -> True",
+     "ref": {
+      "entity_id": 851386,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-81",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Swamp Cooler (Costco)' (ID 315689018): False -> True",
+     "ref": {
+      "entity_id": 315689018,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-82",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Swamp Cooler TGL' (ID 315671611): False -> True",
+     "ref": {
+      "entity_id": 315671611,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-83",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Wine Unit' (ID 851258): False -> True",
+     "ref": {
+      "entity_id": 851258,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-84",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Wine Unit (Costco)' (ID 315689658): False -> True",
+     "ref": {
+      "entity_id": 315689658,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-85",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Wine Unit TGL' (ID 315681210): False -> True",
+     "ref": {
+      "entity_id": 315681210,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-86",
+     "kind": "todo",
+     "text": "Set noCharge on 'Commercial Plumbing Install Toilet/Urinal' (ID 601904888): False -> True",
+     "ref": {
+      "entity_id": 601904888,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-87",
+     "kind": "todo",
+     "text": "Set noCharge on 'Commercial Plumbing Install Water Heater' (ID 624368701): False -> True",
+     "ref": {
+      "entity_id": 624368701,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-88",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Bidet' (ID 455500926): False -> True",
+     "ref": {
+      "entity_id": 455500926,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-89",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Dishwasher' (ID 455503568): False -> True",
+     "ref": {
+      "entity_id": 455503568,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-90",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Faucet' (ID 455500766): False -> True",
+     "ref": {
+      "entity_id": 455500766,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-91",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Laundry Sink' (ID 455483820): False -> True",
+     "ref": {
+      "entity_id": 455483820,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-92",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Remodel' (ID 531627996): False -> True",
+     "ref": {
+      "entity_id": 531627996,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-93",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Rough In' (ID 455503180): False -> True",
+     "ref": {
+      "entity_id": 455503180,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-94",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Undermount Sink' (ID 455498603): False -> True",
+     "ref": {
+      "entity_id": 455498603,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-95",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Install Washer/Dryer' (ID 455499244): False -> True",
+     "ref": {
+      "entity_id": 455499244,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-96",
+     "kind": "todo",
+     "text": "Set noCharge on 'Plumbing Drain Root Treatment' (ID 410284672): False -> True",
+     "ref": {
+      "entity_id": 410284672,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-97",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install IAQ' (ID 531827290): False -> True",
+     "ref": {
+      "entity_id": 531827290,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-98",
+     "kind": "todo",
+     "text": "Set noCharge on 'Install Thermostat TGL' (ID 633723614): False -> True",
+     "ref": {
+      "entity_id": 633723614,
+      "current": false,
+      "target": true,
+      "class": "Install",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-99",
+     "kind": "todo",
+     "text": "Set noCharge on 'Commercial Install Plumbing part' (ID 624527930): False -> True",
+     "ref": {
+      "entity_id": 624527930,
+      "current": false,
+      "target": true,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 0
+     }
+    },
+    {
+     "id": "JTC-8-100",
+     "kind": "verified",
+     "text": "99 of 274 active classed job types have the wrong noCharge flag vs the J4 class default rule (census_results.json -> nocharge_audit). Rule: noCharge default per class (J4, 2026-07-23): FALSE on Demand/SC/MTU/Estimate(+TGL/Marketed/Big Box); TRUE on Install/C-W family/Non-Opp/RTCR.",
+     "ref": {
+      "current": 99,
+      "target": 274
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "JTC-9",
+   "group": "job_types",
+   "title": "Split shared job types onto family-scoped Recall/Warranty/RTCR types (one-BU-family rule)",
+   "status": "open",
+   "bu": "multi",
+   "job_type_scope": {
+    "count": 88,
+    "note": "see items[].ref"
+   },
+   "class_scope": [
+    "Callback / Warranty",
+    "Demand",
+    "Estimate",
+    "Install",
+    "Marketed Tune Up",
+    "Non-Opportunity",
+    "Return to Complete Repair",
+    "System Check"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-9-1",
+     "kind": "partner",
+     "text": "Split 'Recall/Warranty' [Callback / Warranty, 1992 jobs]: HVAC - Install - AOR (781) -> HVAC - Install Callback -> Recall/Warranty split (Install ruling PENDING) | HVAC - Service (627) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes) | Plumbing - Service (305) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes) | Plumbing - Install (137) -> Plumbing - Install Callback -> Recall/Warranty split (Install ruling PENDING) | HVAC - Maintenance (91) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes) | Plumbing - Maintenance (33) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes) | Plumbing - Drains (11) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes) | HVAC - Sales (NR) (6) -> MISCLASS on Sales BU - rebook, no lane | HVAC - Sales Costco (NR) (1) -> MISCLASS on Sales BU - rebook, no lane",
+     "ref": {
+      "current": 1992,
+      "class": "Callback / Warranty",
+      "multi_family": true,
+      "map": [
+       "HVAC - Install - AOR (781) -> HVAC - Install Callback -> Recall/Warranty split (Install ruling PENDING)",
+       "HVAC - Service (627) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes)",
+       "Plumbing - Service (305) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes)",
+       "Plumbing - Install (137) -> Plumbing - Install Callback -> Recall/Warranty split (Install ruling PENDING)",
+       "HVAC - Maintenance (91) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes)",
+       "Plumbing - Maintenance (33) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes)",
+       "Plumbing - Drains (11) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes)",
+       "HVAC - Sales (NR) (6) -> MISCLASS on Sales BU - rebook, no lane",
+       "HVAC - Sales Costco (NR) (1) -> MISCLASS on Sales BU - rebook, no lane"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-2",
+     "kind": "todo",
+     "text": "Split 'Install HVAC Part 1-2 HRS' [Return to Complete Repair, 757 jobs]: HVAC - Service (404) -> HVAC - Return to Complete Repair | HVAC - Maintenance (209) -> HVAC - Return to Complete Repair | HVAC - Install - AOR (144) -> HVAC - Return to Complete Install (Non-Opp)",
+     "ref": {
+      "current": 757,
+      "class": "Return to Complete Repair",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (404) -> HVAC - Return to Complete Repair",
+       "HVAC - Maintenance (209) -> HVAC - Return to Complete Repair",
+       "HVAC - Install - AOR (144) -> HVAC - Return to Complete Install (Non-Opp)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-3",
+     "kind": "todo",
+     "text": "Split 'Plumbing Part Install 3-5 HRS' [Return to Complete Repair, 688 jobs]: Plumbing - Install (545) -> Plumbing - Return to Complete Install (Non-Opp) | Plumbing - Service (143) -> Plumbing - Return to Complete Repair",
+     "ref": {
+      "current": 688,
+      "class": "Return to Complete Repair",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Install (545) -> Plumbing - Return to Complete Install (Non-Opp)",
+       "Plumbing - Service (143) -> Plumbing - Return to Complete Repair"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-4",
+     "kind": "partner",
+     "text": "Split 'AC Issue 4-7 yrs' [Demand, 620 jobs]: HVAC - Service (611) -> HVAC - Demand | HVAC - Maintenance (7) -> HVAC - Demand | HVAC - Install - AOR (2) -> JUDGMENT",
+     "ref": {
+      "current": 620,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (611) -> HVAC - Demand",
+       "HVAC - Maintenance (7) -> HVAC - Demand",
+       "HVAC - Install - AOR (2) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-5",
+     "kind": "todo",
+     "text": "Split 'Plumbing Finish Job' [Non-Opportunity, 489 jobs]: Plumbing - Install (484) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment) | Plumbing - Service (5) -> Plumbing - Non-Opportunity",
+     "ref": {
+      "current": 489,
+      "class": "Non-Opportunity",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Install (484) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)",
+       "Plumbing - Service (5) -> Plumbing - Non-Opportunity"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-6",
+     "kind": "todo",
+     "text": "Split 'Install HVAC Part 4-5 HRS' [Return to Complete Repair, 454 jobs]: HVAC - Service (269) -> HVAC - Return to Complete Repair | HVAC - Install - AOR (99) -> HVAC - Return to Complete Install (Non-Opp) | HVAC - Maintenance (86) -> HVAC - Return to Complete Repair",
+     "ref": {
+      "current": 454,
+      "class": "Return to Complete Repair",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (269) -> HVAC - Return to Complete Repair",
+       "HVAC - Install - AOR (99) -> HVAC - Return to Complete Install (Non-Opp)",
+       "HVAC - Maintenance (86) -> HVAC - Return to Complete Repair"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-7",
+     "kind": "partner",
+     "text": "Split 'Plumbing Leak Other/Unknown Origin' [Demand, 430 jobs]: Plumbing - Service (421) -> Plumbing - Demand | Plumbing - Maintenance (5) -> Plumbing - Demand | Plumbing - Install (3) -> JUDGMENT | Plumbing - Drains (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 430,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Service (421) -> Plumbing - Demand",
+       "Plumbing - Maintenance (5) -> Plumbing - Demand",
+       "Plumbing - Install (3) -> JUDGMENT",
+       "Plumbing - Drains (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-8",
+     "kind": "partner",
+     "text": "Split 'AC Issue 1-3 yrs' [Demand, 429 jobs]: HVAC - Service (422) -> HVAC - Demand | HVAC - Maintenance (5) -> HVAC - Demand | HVAC - Install - AOR (2) -> JUDGMENT",
+     "ref": {
+      "current": 429,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (422) -> HVAC - Demand",
+       "HVAC - Maintenance (5) -> HVAC - Demand",
+       "HVAC - Install - AOR (2) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-9",
+     "kind": "partner",
+     "text": "Split 'Thermostat Issue' [Demand, 241 jobs]: HVAC - Service (236) -> HVAC - Demand (Thermostat) | HVAC - Maintenance (4) -> HVAC - Demand (Thermostat) | HVAC - Install - AOR (1) -> JUDGMENT",
+     "ref": {
+      "current": 241,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (236) -> HVAC - Demand (Thermostat)",
+       "HVAC - Maintenance (4) -> HVAC - Demand (Thermostat)",
+       "HVAC - Install - AOR (1) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-10",
+     "kind": "partner",
+     "text": "Split 'Plumbing Water Softener/Conditioner/Filtration/RO' [Demand, 230 jobs]: Plumbing - Service (223) -> Plumbing - Demand | Plumbing - Install (4) -> JUDGMENT | Plumbing - Drains (2) -> Plumbing - Demand | Plumbing - Maintenance (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 230,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Service (223) -> Plumbing - Demand",
+       "Plumbing - Install (4) -> JUDGMENT",
+       "Plumbing - Drains (2) -> Plumbing - Demand",
+       "Plumbing - Maintenance (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-11",
+     "kind": "partner",
+     "text": "Split 'Plumbing Install Water Softener/Filtration/Reverse Osmosis' [Install, 187 jobs]: Plumbing - Install (186) -> Plumbing - Install | Plumbing - Service (1) -> JUDGMENT",
+     "ref": {
+      "current": 187,
+      "class": "Install",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Install (186) -> Plumbing - Install",
+       "Plumbing - Service (1) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-12",
+     "kind": "todo",
+     "text": "Split 'Retro Finish' [Non-Opportunity, 175 jobs]: HVAC - Install - AOR (173) -> HVAC - Return to Complete Install OR Licensed Inspection (judgment) | HVAC - Service (1) -> HVAC - Non-Opportunity | Plumbing - Install (1) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)",
+     "ref": {
+      "current": 175,
+      "class": "Non-Opportunity",
+      "multi_family": true,
+      "map": [
+       "HVAC - Install - AOR (173) -> HVAC - Return to Complete Install OR Licensed Inspection (judgment)",
+       "HVAC - Service (1) -> HVAC - Non-Opportunity",
+       "Plumbing - Install (1) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-13",
+     "kind": "todo",
+     "text": "Split 'Plumbing Job Walk' [Non-Opportunity, 70 jobs]: Plumbing - Install (69) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment) | Plumbing - Service (1) -> Plumbing - Non-Opportunity",
+     "ref": {
+      "current": 70,
+      "class": "Non-Opportunity",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Install (69) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)",
+       "Plumbing - Service (1) -> Plumbing - Non-Opportunity"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-14",
+     "kind": "partner",
+     "text": "Split 'Plumbing Install Jetter' [Install, 42 jobs]: Plumbing - Drains (41) -> JUDGMENT | Plumbing - Install (1) -> Plumbing - Install (Jetter)",
+     "ref": {
+      "current": 42,
+      "class": "Install",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Drains (41) -> JUDGMENT",
+       "Plumbing - Install (1) -> Plumbing - Install (Jetter)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-15",
+     "kind": "todo",
+     "text": "Split 'Estimate Ductwork' [Estimate, 34 jobs]: HVAC - Sales (NR) (30) -> HVAC - Estimate (Duct) | HVAC - Service (2) -> rewire to HVAC - Sales BU: HVAC - Estimate (Duct) | HVAC - Sales Costco (NR) (2) -> HVAC - Estimate (Duct)",
+     "ref": {
+      "current": 34,
+      "class": "Estimate",
+      "multi_family": true,
+      "map": [
+       "HVAC - Sales (NR) (30) -> HVAC - Estimate (Duct)",
+       "HVAC - Service (2) -> rewire to HVAC - Sales BU: HVAC - Estimate (Duct)",
+       "HVAC - Sales Costco (NR) (2) -> HVAC - Estimate (Duct)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-16",
+     "kind": "partner",
+     "text": "Split 'Client Resolution' [Callback / Warranty, 25 jobs]: Plumbing - Service (10) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes) | HVAC - Service (6) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes) | HVAC - Maintenance (5) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes) | Plumbing - Install (3) -> Plumbing - Install Callback -> Recall/Warranty split (Install ruling PENDING) | HVAC - Install - AOR (1) -> HVAC - Install Callback -> Recall/Warranty split (Install ruling PENDING)",
+     "ref": {
+      "current": 25,
+      "class": "Callback / Warranty",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Service (10) -> Plumbing - Recall + Plumbing - Warranty (C/W splits into BOTH lanes)",
+       "HVAC - Service (6) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes)",
+       "HVAC - Maintenance (5) -> HVAC - Recall + HVAC - Warranty (C/W splits into BOTH lanes)",
+       "Plumbing - Install (3) -> Plumbing - Install Callback -> Recall/Warranty split (Install ruling PENDING)",
+       "HVAC - Install - AOR (1) -> HVAC - Install Callback -> Recall/Warranty split (Install ruling PENDING)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-17",
+     "kind": "partner",
+     "text": "Split 'Plumbing Install Trenched Sewer Replacement' [Install, 10 jobs]: Plumbing - Drains (7) -> JUDGMENT | Plumbing - Install (3) -> Plumbing - Install",
+     "ref": {
+      "current": 10,
+      "class": "Install",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Drains (7) -> JUDGMENT",
+       "Plumbing - Install (3) -> Plumbing - Install"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-18",
+     "kind": "todo",
+     "text": "Split 'Estimate Move Equipment' [Estimate, 6 jobs]: HVAC - Service (5) -> rewire to HVAC - Sales BU: HVAC - Estimate | HVAC - Sales (NR) (1) -> HVAC - Estimate",
+     "ref": {
+      "current": 6,
+      "class": "Estimate",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (5) -> rewire to HVAC - Sales BU: HVAC - Estimate",
+       "HVAC - Sales (NR) (1) -> HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-19",
+     "kind": "partner",
+     "text": "Split 'Plumbing Water Test/Treatment' [Demand, 5 jobs]: Plumbing - Service (4) -> Plumbing - Demand | Plumbing - Install (1) -> JUDGMENT",
+     "ref": {
+      "current": 5,
+      "class": "Demand",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Service (4) -> Plumbing - Demand",
+       "Plumbing - Install (1) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-20",
+     "kind": "partner",
+     "text": "Split 'Plumbing Install Garbage Disposal' [Install, 4 jobs]: Plumbing - Install (2) -> Plumbing - Install | Plumbing - Service (2) -> JUDGMENT",
+     "ref": {
+      "current": 4,
+      "class": "Install",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Install (2) -> Plumbing - Install",
+       "Plumbing - Service (2) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-21",
+     "kind": "todo",
+     "text": "Split 'Commercial Estimate Cooling/Heating' [Estimate, 4 jobs]: HVAC - Service (2) -> rewire to HVAC - Sales BU: HVAC - Estimate | HVAC - Sales (NR) (2) -> HVAC - Estimate",
+     "ref": {
+      "current": 4,
+      "class": "Estimate",
+      "multi_family": true,
+      "map": [
+       "HVAC - Service (2) -> rewire to HVAC - Sales BU: HVAC - Estimate",
+       "HVAC - Sales (NR) (2) -> HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-22",
+     "kind": "partner",
+     "text": "Split 'Plumbing Install Kitchen Sink' [Install, 2 jobs]: Plumbing - Service (1) -> JUDGMENT | Plumbing - Install (1) -> Plumbing - Install",
+     "ref": {
+      "current": 2,
+      "class": "Install",
+      "multi_family": true,
+      "map": [
+       "Plumbing - Service (1) -> JUDGMENT",
+       "Plumbing - Install (1) -> Plumbing - Install"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-23",
+     "kind": "todo",
+     "text": "Split 'Estimate Furnace' [Estimate, 2 jobs]: HVAC - Sales (NR) (1) -> HVAC - Estimate | HVAC - Service (1) -> rewire to HVAC - Sales BU: HVAC - Estimate",
+     "ref": {
+      "current": 2,
+      "class": "Estimate",
+      "multi_family": true,
+      "map": [
+       "HVAC - Sales (NR) (1) -> HVAC - Estimate",
+       "HVAC - Service (1) -> rewire to HVAC - Sales BU: HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-24",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (1 System) 4-7 Yrs' [System Check, 1521 jobs]: HVAC - Maintenance (1406) -> HVAC - Member System Check | HVAC - Service (115) -> HVAC - Member System Check",
+     "ref": {
+      "current": 1521,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (1406) -> HVAC - Member System Check",
+       "HVAC - Service (115) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-25",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (1 System) 1-3 Yrs' [System Check, 1231 jobs]: HVAC - Maintenance (1138) -> HVAC - Member System Check | HVAC - Service (93) -> HVAC - Member System Check",
+     "ref": {
+      "current": 1231,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (1138) -> HVAC - Member System Check",
+       "HVAC - Service (93) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-26",
+     "kind": "todo",
+     "text": "Split 'Estimate AC TGL' [Estimate, 1210 jobs]: HVAC - Sales (NR) (1203) -> HVAC - Estimate | HVAC - Sales Costco (NR) (7) -> HVAC - Estimate",
+     "ref": {
+      "current": 1210,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "HVAC - Sales (NR) (1203) -> HVAC - Estimate",
+       "HVAC - Sales Costco (NR) (7) -> HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-27",
+     "kind": "todo",
+     "text": "Split 'Plumbing SAM Tanked Water Heater Service 1-5 Yrs' [System Check, 1198 jobs]: Plumbing - Maintenance (1057) -> Plumbing - Member System Check -> Member Inspection | Plumbing - Service (138) -> Plumbing - Member System Check -> Member Inspection | HVAC - Maintenance (2) -> HVAC - Member System Check (Water Heater) | HVAC - Service (1) -> HVAC - Member System Check (Water Heater)",
+     "ref": {
+      "current": 1198,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Maintenance (1057) -> Plumbing - Member System Check -> Member Inspection",
+       "Plumbing - Service (138) -> Plumbing - Member System Check -> Member Inspection",
+       "HVAC - Maintenance (2) -> HVAC - Member System Check (Water Heater)",
+       "HVAC - Service (1) -> HVAC - Member System Check (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-28",
+     "kind": "partner",
+     "text": "Split 'SAM Cooling Service (1 System) 8+ Yrs' [System Check, 970 jobs]: HVAC - Maintenance (916) -> HVAC - Member System Check | HVAC - Service (53) -> HVAC - Member System Check | OLD - HVAC - Commercial (1) -> JUDGMENT",
+     "ref": {
+      "current": 970,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (916) -> HVAC - Member System Check",
+       "HVAC - Service (53) -> HVAC - Member System Check",
+       "OLD - HVAC - Commercial (1) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-29",
+     "kind": "todo",
+     "text": "Split 'AC Issue 8+ yrs' [Demand, 921 jobs]: HVAC - Service (915) -> HVAC - Demand | HVAC - Maintenance (6) -> HVAC - Demand",
+     "ref": {
+      "current": 921,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (915) -> HVAC - Demand",
+       "HVAC - Maintenance (6) -> HVAC - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-30",
+     "kind": "todo",
+     "text": "Split 'Quality Assurance' [Non-Opportunity, 859 jobs]: HVAC - Install - AOR (709) -> HVAC - Return to Complete Install OR Licensed Inspection (judgment) | Plumbing - Install (150) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)",
+     "ref": {
+      "current": 859,
+      "class": "Non-Opportunity",
+      "multi_family": false,
+      "map": [
+       "HVAC - Install - AOR (709) -> HVAC - Return to Complete Install OR Licensed Inspection (judgment)",
+       "Plumbing - Install (150) -> Plumbing - Return to Complete Install OR Licensed Inspection (judgment)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-31",
+     "kind": "todo",
+     "text": "Split 'Plumbing SAM Tanked Water Heater Service 6+ Yrs' [System Check, 781 jobs]: Plumbing - Maintenance (672) -> Plumbing - Member System Check -> Member Inspection | Plumbing - Service (106) -> Plumbing - Member System Check -> Member Inspection | HVAC - Service (2) -> HVAC - Member System Check (Water Heater) | HVAC - Maintenance (1) -> HVAC - Member System Check (Water Heater)",
+     "ref": {
+      "current": 781,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Maintenance (672) -> Plumbing - Member System Check -> Member Inspection",
+       "Plumbing - Service (106) -> Plumbing - Member System Check -> Member Inspection",
+       "HVAC - Service (2) -> HVAC - Member System Check (Water Heater)",
+       "HVAC - Maintenance (1) -> HVAC - Member System Check (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-32",
+     "kind": "todo",
+     "text": "Split 'Plumbing SAM Tankless Water Heater Service 1-5 Yrs' [System Check, 746 jobs]: Plumbing - Maintenance (656) -> Plumbing - Member System Check -> Member Inspection | Plumbing - Service (89) -> Plumbing - Member System Check -> Member Inspection | HVAC - Maintenance (1) -> HVAC - Member System Check (Water Heater)",
+     "ref": {
+      "current": 746,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Maintenance (656) -> Plumbing - Member System Check -> Member Inspection",
+       "Plumbing - Service (89) -> Plumbing - Member System Check -> Member Inspection",
+       "HVAC - Maintenance (1) -> HVAC - Member System Check (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-33",
+     "kind": "partner",
+     "text": "Split 'SAM Cooling Service (2 System) 8+ Yrs' [System Check, 661 jobs]: HVAC - Maintenance (627) -> HVAC - Member System Check | HVAC - Service (33) -> HVAC - Member System Check | OLD - HVAC - Commercial (1) -> JUDGMENT",
+     "ref": {
+      "current": 661,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (627) -> HVAC - Member System Check",
+       "HVAC - Service (33) -> HVAC - Member System Check",
+       "OLD - HVAC - Commercial (1) -> JUDGMENT"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-34",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (2 System) 4-7 Yrs' [System Check, 603 jobs]: HVAC - Maintenance (569) -> HVAC - Member System Check | HVAC - Service (34) -> HVAC - Member System Check",
+     "ref": {
+      "current": 603,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (569) -> HVAC - Member System Check",
+       "HVAC - Service (34) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-35",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (2 System) 1-3 Yrs' [System Check, 480 jobs]: HVAC - Maintenance (449) -> HVAC - Member System Check | HVAC - Service (31) -> HVAC - Member System Check",
+     "ref": {
+      "current": 480,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (449) -> HVAC - Member System Check",
+       "HVAC - Service (31) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-36",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (1 System) 4-7 Yrs' [System Check, 456 jobs]: HVAC - Maintenance (432) -> HVAC - Member System Check | HVAC - Service (24) -> HVAC - Member System Check",
+     "ref": {
+      "current": 456,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (432) -> HVAC - Member System Check",
+       "HVAC - Service (24) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-37",
+     "kind": "todo",
+     "text": "Split 'Plumbing SAM Tankless Water Heater Service 6+ Yrs' [System Check, 450 jobs]: Plumbing - Maintenance (363) -> Plumbing - Member System Check -> Member Inspection | Plumbing - Service (83) -> Plumbing - Member System Check -> Member Inspection | HVAC - Maintenance (4) -> HVAC - Member System Check (Water Heater)",
+     "ref": {
+      "current": 450,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Maintenance (363) -> Plumbing - Member System Check -> Member Inspection",
+       "Plumbing - Service (83) -> Plumbing - Member System Check -> Member Inspection",
+       "HVAC - Maintenance (4) -> HVAC - Member System Check (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-38",
+     "kind": "todo",
+     "text": "Split 'Estimate AC Costco' [Estimate, 369 jobs]: HVAC - Sales Costco (NR) (366) -> HVAC - Estimate | HVAC - Sales (NR) (3) -> HVAC - Estimate",
+     "ref": {
+      "current": 369,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "HVAC - Sales Costco (NR) (366) -> HVAC - Estimate",
+       "HVAC - Sales (NR) (3) -> HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-39",
+     "kind": "todo",
+     "text": "Split 'Semi Annual Tune-up 8+ yrs' [Marketed Tune Up, 368 jobs]: HVAC - Service (365) -> HVAC - Marketed Tune Up | HVAC - Maintenance (3) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 368,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (365) -> HVAC - Marketed Tune Up",
+       "HVAC - Maintenance (3) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-40",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (1 System) 1-3 Yrs' [System Check, 357 jobs]: HVAC - Maintenance (344) -> HVAC - Member System Check | HVAC - Service (13) -> HVAC - Member System Check",
+     "ref": {
+      "current": 357,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (344) -> HVAC - Member System Check",
+       "HVAC - Service (13) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-41",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (1 System) 8+ Yrs' [System Check, 343 jobs]: HVAC - Maintenance (330) -> HVAC - Member System Check | HVAC - Service (13) -> HVAC - Member System Check",
+     "ref": {
+      "current": 343,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (330) -> HVAC - Member System Check",
+       "HVAC - Service (13) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-42",
+     "kind": "todo",
+     "text": "Split 'Estimate AC' [Estimate, 280 jobs]: HVAC - Sales (NR) (264) -> HVAC - Estimate | HVAC - Sales Costco (NR) (16) -> HVAC - Estimate",
+     "ref": {
+      "current": 280,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "HVAC - Sales (NR) (264) -> HVAC - Estimate",
+       "HVAC - Sales Costco (NR) (16) -> HVAC - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-43",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (2 System) 8+ Yrs' [System Check, 269 jobs]: HVAC - Maintenance (258) -> HVAC - Member System Check | HVAC - Service (11) -> HVAC - Member System Check",
+     "ref": {
+      "current": 269,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (258) -> HVAC - Member System Check",
+       "HVAC - Service (11) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-44",
+     "kind": "todo",
+     "text": "Split 'Plumbing Faucet Kitchen/Lav/Laundry Issue/Leak' [Demand, 259 jobs]: Plumbing - Service (256) -> Plumbing - Demand | Plumbing - Drains (2) -> Plumbing - Demand | Plumbing - Maintenance (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 259,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (256) -> Plumbing - Demand",
+       "Plumbing - Drains (2) -> Plumbing - Demand",
+       "Plumbing - Maintenance (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-45",
+     "kind": "todo",
+     "text": "Split 'Semi Annual Tune-up 1-3 yrs' [Marketed Tune Up, 226 jobs]: HVAC - Service (222) -> HVAC - Marketed Tune Up | HVAC - Maintenance (4) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 226,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (222) -> HVAC - Marketed Tune Up",
+       "HVAC - Maintenance (4) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-46",
+     "kind": "todo",
+     "text": "Split 'Semi Annual Tune-up 4-7 yrs' [Marketed Tune Up, 204 jobs]: HVAC - Service (198) -> HVAC - Marketed Tune Up | HVAC - Maintenance (6) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 204,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (198) -> HVAC - Marketed Tune Up",
+       "HVAC - Maintenance (6) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-47",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tanked Water Heater Issue 6+ yrs' [Demand, 198 jobs]: Plumbing - Service (195) -> Plumbing - Demand (Water Heater) | Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)",
+     "ref": {
+      "current": 198,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (195) -> Plumbing - Demand (Water Heater)",
+       "Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-48",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (2 System) 4-7 Yrs' [System Check, 187 jobs]: HVAC - Maintenance (182) -> HVAC - Member System Check | HVAC - Service (5) -> HVAC - Member System Check",
+     "ref": {
+      "current": 187,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (182) -> HVAC - Member System Check",
+       "HVAC - Service (5) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-49",
+     "kind": "todo",
+     "text": "Split 'Plumbing Toilet Issue/Leak' [Demand, 161 jobs]: Plumbing - Service (156) -> Plumbing - Demand (Oil) | Plumbing - Maintenance (4) -> Plumbing - Demand (Oil) | Plumbing - Drains (1) -> Plumbing - Demand (Oil)",
+     "ref": {
+      "current": 161,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (156) -> Plumbing - Demand (Oil)",
+       "Plumbing - Maintenance (4) -> Plumbing - Demand (Oil)",
+       "Plumbing - Drains (1) -> Plumbing - Demand (Oil)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-50",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (2 System) 1-3 Yrs' [System Check, 151 jobs]: HVAC - Maintenance (145) -> HVAC - Member System Check | HVAC - Service (6) -> HVAC - Member System Check",
+     "ref": {
+      "current": 151,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (145) -> HVAC - Member System Check",
+       "HVAC - Service (6) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-51",
+     "kind": "todo",
+     "text": "Split 'Plumbing Faucet Bathtub/Shower Valve Issue' [Demand, 149 jobs]: Plumbing - Service (145) -> Plumbing - Demand | Plumbing - Maintenance (3) -> Plumbing - Demand | Plumbing - Drains (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 149,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (145) -> Plumbing - Demand",
+       "Plumbing - Maintenance (3) -> Plumbing - Demand",
+       "Plumbing - Drains (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-52",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (3 System) 8+ Yrs' [System Check, 120 jobs]: HVAC - Maintenance (117) -> HVAC - Member System Check | HVAC - Service (3) -> HVAC - Member System Check",
+     "ref": {
+      "current": 120,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (117) -> HVAC - Member System Check",
+       "HVAC - Service (3) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-53",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tanked Water Heater Issue 1-5 yrs' [Demand, 120 jobs]: Plumbing - Service (118) -> Plumbing - Demand (Water Heater) | Plumbing - Maintenance (2) -> Plumbing - Demand (Water Heater)",
+     "ref": {
+      "current": 120,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (118) -> Plumbing - Demand (Water Heater)",
+       "Plumbing - Maintenance (2) -> Plumbing - Demand (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-54",
+     "kind": "todo",
+     "text": "Split 'Filter Change 1-7 Yrs' [Marketed Tune Up, 112 jobs]: HVAC - Service (101) -> HVAC - Marketed Tune Up | HVAC - Maintenance (11) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 112,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (101) -> HVAC - Marketed Tune Up",
+       "HVAC - Maintenance (11) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-55",
+     "kind": "todo",
+     "text": "Split 'Plumbing Estimate Tanked Water Heater' [Estimate, 111 jobs]: Plumbing - Service (110) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Water Heater) | Plumbing - Maintenance (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Water Heater)",
+     "ref": {
+      "current": 111,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (110) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Water Heater)",
+       "Plumbing - Maintenance (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-56",
+     "kind": "todo",
+     "text": "Split 'Plumbing Drain Kitchen/Lav/Laundry' [Demand, 101 jobs]: Plumbing - Drains (91) -> Plumbing - Demand | Plumbing - Service (8) -> Plumbing - Demand | Plumbing - Maintenance (2) -> Plumbing - Demand",
+     "ref": {
+      "current": 101,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Drains (91) -> Plumbing - Demand",
+       "Plumbing - Service (8) -> Plumbing - Demand",
+       "Plumbing - Maintenance (2) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-57",
+     "kind": "todo",
+     "text": "Split 'Plumbing Garbage Disposal Issue/Leak' [Demand, 93 jobs]: Plumbing - Service (92) -> Plumbing - Demand | Plumbing - Maintenance (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 93,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (92) -> Plumbing - Demand",
+       "Plumbing - Maintenance (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-58",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (3 System) 4-7 Yrs' [System Check, 84 jobs]: HVAC - Maintenance (81) -> HVAC - Member System Check | HVAC - Service (3) -> HVAC - Member System Check",
+     "ref": {
+      "current": 84,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (81) -> HVAC - Member System Check",
+       "HVAC - Service (3) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-59",
+     "kind": "todo",
+     "text": "Split 'Plumbing Toilet Clog' [Demand, 83 jobs]: Plumbing - Service (73) -> Plumbing - Demand (Oil) | Plumbing - Drains (10) -> Plumbing - Demand (Oil)",
+     "ref": {
+      "current": 83,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (73) -> Plumbing - Demand (Oil)",
+       "Plumbing - Drains (10) -> Plumbing - Demand (Oil)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-60",
+     "kind": "todo",
+     "text": "Split 'Plumbing Drain Bathtub/Shower' [Demand, 61 jobs]: Plumbing - Drains (57) -> Plumbing - Demand | Plumbing - Service (4) -> Plumbing - Demand",
+     "ref": {
+      "current": 61,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Drains (57) -> Plumbing - Demand",
+       "Plumbing - Service (4) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-61",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tankless Water Heater Issue 6+ yrs' [Demand, 59 jobs]: Plumbing - Service (56) -> Plumbing - Demand (Water Heater) | Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)",
+     "ref": {
+      "current": 59,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (56) -> Plumbing - Demand (Water Heater)",
+       "Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-62",
+     "kind": "todo",
+     "text": "Split 'Plumbing Drain Camera Inspection' [Estimate, 58 jobs]: Plumbing - Drains (54) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Camera) | Plumbing - Service (4) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Camera)",
+     "ref": {
+      "current": 58,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Drains (54) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Camera)",
+       "Plumbing - Service (4) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Camera)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-63",
+     "kind": "todo",
+     "text": "Split 'Filter Change 8+' [Marketed Tune Up, 54 jobs]: HVAC - Service (52) -> HVAC - Marketed Tune Up | HVAC - Maintenance (2) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 54,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (52) -> HVAC - Marketed Tune Up",
+       "HVAC - Maintenance (2) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-64",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (3 System) 8+ Yrs' [System Check, 51 jobs]: HVAC - Maintenance (49) -> HVAC - Member System Check | HVAC - Service (2) -> HVAC - Member System Check",
+     "ref": {
+      "current": 51,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (49) -> HVAC - Member System Check",
+       "HVAC - Service (2) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-65",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (4 System) 8+ Yrs' [System Check, 47 jobs]: HVAC - Maintenance (44) -> HVAC - Member System Check | HVAC - Service (3) -> HVAC - Member System Check",
+     "ref": {
+      "current": 47,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (44) -> HVAC - Member System Check",
+       "HVAC - Service (3) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-66",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (3 system) 1-3 Yrs' [System Check, 47 jobs]: HVAC - Maintenance (41) -> HVAC - Member System Check | HVAC - Service (6) -> HVAC - Member System Check",
+     "ref": {
+      "current": 47,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (41) -> HVAC - Member System Check",
+       "HVAC - Service (6) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-67",
+     "kind": "todo",
+     "text": "Split 'Plumbing Drain Main Sewer Line' [Demand, 45 jobs]: Plumbing - Drains (41) -> Plumbing - Demand | Plumbing - Service (4) -> Plumbing - Demand",
+     "ref": {
+      "current": 45,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Drains (41) -> Plumbing - Demand",
+       "Plumbing - Service (4) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-68",
+     "kind": "todo",
+     "text": "Split 'Plumbing Leak Bathtub/Shower' [Demand, 44 jobs]: Plumbing - Service (43) -> Plumbing - Demand | Plumbing - Maintenance (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 44,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (43) -> Plumbing - Demand",
+       "Plumbing - Maintenance (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-69",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tanked Water Heater Tune-up 6+ yrs' [Marketed Tune Up, 43 jobs]: Plumbing - Service (42) -> Plumbing - Marketed Tune Up (Water Heater) | Plumbing - Drains (1) -> Plumbing - Marketed Tune Up (Water Heater)",
+     "ref": {
+      "current": 43,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (42) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "Plumbing - Drains (1) -> Plumbing - Marketed Tune Up (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-70",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tankless Water Heater Issue 1-5 yrs' [Demand, 42 jobs]: Plumbing - Service (39) -> Plumbing - Demand (Water Heater) | Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)",
+     "ref": {
+      "current": 42,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (39) -> Plumbing - Demand (Water Heater)",
+       "Plumbing - Maintenance (3) -> Plumbing - Demand (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-71",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tanked Water Heater Tune-up 1-5 yrs' [Marketed Tune Up, 37 jobs]: Plumbing - Service (34) -> Plumbing - Marketed Tune Up (Water Heater) | Plumbing - Maintenance (2) -> Plumbing - Marketed Tune Up (Water Heater) | HVAC - Service (1) -> HVAC - Marketed Tune Up (Water Heater)",
+     "ref": {
+      "current": 37,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (34) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "Plumbing - Maintenance (2) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "HVAC - Service (1) -> HVAC - Marketed Tune Up (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-72",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (3 System) 4-7 Yrs' [System Check, 31 jobs]: HVAC - Maintenance (30) -> HVAC - Member System Check | HVAC - Service (1) -> HVAC - Member System Check",
+     "ref": {
+      "current": 31,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (30) -> HVAC - Member System Check",
+       "HVAC - Service (1) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-73",
+     "kind": "todo",
+     "text": "Split 'Plumbing Estimate Gas Line' [Estimate, 29 jobs]: Plumbing - Service (28) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Gas Line) | Plumbing - Drains (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Gas Line)",
+     "ref": {
+      "current": 29,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (28) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Gas Line)",
+       "Plumbing - Drains (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate (Gas Line)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-74",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tankless Water Heater Tune-up 1-5 yrs' [Marketed Tune Up, 29 jobs]: Plumbing - Service (25) -> Plumbing - Marketed Tune Up (Water Heater) | Plumbing - Maintenance (4) -> Plumbing - Marketed Tune Up (Water Heater)",
+     "ref": {
+      "current": 29,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (25) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "Plumbing - Maintenance (4) -> Plumbing - Marketed Tune Up (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-75",
+     "kind": "todo",
+     "text": "Split 'Plumbing Estimate Main Water Line' [Estimate, 23 jobs]: Plumbing - Service (22) -> rewire to Plumbing - Sales BU: Plumbing - Estimate | Plumbing - Drains (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate",
+     "ref": {
+      "current": 23,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (22) -> rewire to Plumbing - Sales BU: Plumbing - Estimate",
+       "Plumbing - Drains (1) -> rewire to Plumbing - Sales BU: Plumbing - Estimate"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-76",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (4 System) 4-7 Yrs' [System Check, 19 jobs]: HVAC - Maintenance (18) -> HVAC - Member System Check | HVAC - Service (1) -> HVAC - Member System Check",
+     "ref": {
+      "current": 19,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (18) -> HVAC - Member System Check",
+       "HVAC - Service (1) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-77",
+     "kind": "todo",
+     "text": "Split 'Commercial Cooling/Heating Maintenance' [Marketed Tune Up, 18 jobs]: HVAC - Maintenance (13) -> HVAC - Marketed Tune Up | HVAC - Service (5) -> HVAC - Marketed Tune Up",
+     "ref": {
+      "current": 18,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (13) -> HVAC - Marketed Tune Up",
+       "HVAC - Service (5) -> HVAC - Marketed Tune Up"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-78",
+     "kind": "todo",
+     "text": "Split 'SAM Cooling Service (5 System) 8+ Yrs' [System Check, 17 jobs]: HVAC - Maintenance (15) -> HVAC - Member System Check | HVAC - Service (2) -> HVAC - Member System Check",
+     "ref": {
+      "current": 17,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (15) -> HVAC - Member System Check",
+       "HVAC - Service (2) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-79",
+     "kind": "todo",
+     "text": "Split 'Plumbing Tankless Water Heater Tune-up 6+ yrs' [Marketed Tune Up, 17 jobs]: Plumbing - Service (13) -> Plumbing - Marketed Tune Up (Water Heater) | Plumbing - Maintenance (3) -> Plumbing - Marketed Tune Up (Water Heater) | HVAC - Service (1) -> HVAC - Marketed Tune Up (Water Heater)",
+     "ref": {
+      "current": 17,
+      "class": "Marketed Tune Up",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (13) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "Plumbing - Maintenance (3) -> Plumbing - Marketed Tune Up (Water Heater)",
+       "HVAC - Service (1) -> HVAC - Marketed Tune Up (Water Heater)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-80",
+     "kind": "todo",
+     "text": "Split 'Plumbing Drain Bad Odor' [Demand, 15 jobs]: Plumbing - Drains (11) -> Plumbing - Demand | Plumbing - Maintenance (3) -> Plumbing - Demand | Plumbing - Service (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 15,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Drains (11) -> Plumbing - Demand",
+       "Plumbing - Maintenance (3) -> Plumbing - Demand",
+       "Plumbing - Service (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-81",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (3 System) 1-3 Yrs' [System Check, 14 jobs]: HVAC - Maintenance (13) -> HVAC - Member System Check | HVAC - Service (1) -> HVAC - Member System Check",
+     "ref": {
+      "current": 14,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (13) -> HVAC - Member System Check",
+       "HVAC - Service (1) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-82",
+     "kind": "todo",
+     "text": "Split 'Plumbing Fridge Line' [Demand, 13 jobs]: Plumbing - Service (12) -> Plumbing - Demand | Plumbing - Drains (1) -> Plumbing - Demand",
+     "ref": {
+      "current": 13,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (12) -> Plumbing - Demand",
+       "Plumbing - Drains (1) -> Plumbing - Demand"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-83",
+     "kind": "todo",
+     "text": "Split 'Estimate Mini Split' [Estimate, 12 jobs]: HVAC - Sales (NR) (11) -> HVAC - Estimate (Mini Split) | HVAC - Sales Costco (NR) (1) -> HVAC - Estimate (Mini Split)",
+     "ref": {
+      "current": 12,
+      "class": "Estimate",
+      "multi_family": false,
+      "map": [
+       "HVAC - Sales (NR) (11) -> HVAC - Estimate (Mini Split)",
+       "HVAC - Sales Costco (NR) (1) -> HVAC - Estimate (Mini Split)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-84",
+     "kind": "todo",
+     "text": "Split 'Mini Split Issue 8+ yrs' [Demand, 11 jobs]: HVAC - Service (10) -> HVAC - Demand (Mini Split) | HVAC - Maintenance (1) -> HVAC - Demand (Mini Split)",
+     "ref": {
+      "current": 11,
+      "class": "Demand",
+      "multi_family": false,
+      "map": [
+       "HVAC - Service (10) -> HVAC - Demand (Mini Split)",
+       "HVAC - Maintenance (1) -> HVAC - Demand (Mini Split)"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-85",
+     "kind": "todo",
+     "text": "Split 'Drive By' [Non-Opportunity, 10 jobs]: Plumbing - Service (5) -> Plumbing - Non-Opportunity | HVAC - Service (3) -> HVAC - Non-Opportunity | Plumbing - Maintenance (2) -> Plumbing - Non-Opportunity",
+     "ref": {
+      "current": 10,
+      "class": "Non-Opportunity",
+      "multi_family": false,
+      "map": [
+       "Plumbing - Service (5) -> Plumbing - Non-Opportunity",
+       "HVAC - Service (3) -> HVAC - Non-Opportunity",
+       "Plumbing - Maintenance (2) -> Plumbing - Non-Opportunity"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-86",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (4 System) 4-7 Yrs' [System Check, 6 jobs]: HVAC - Maintenance (5) -> HVAC - Member System Check | HVAC - Service (1) -> HVAC - Member System Check",
+     "ref": {
+      "current": 6,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (5) -> HVAC - Member System Check",
+       "HVAC - Service (1) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-87",
+     "kind": "todo",
+     "text": "Split 'Install Humidifier' [Install, 6 jobs]: HVAC - Install - AOR (5) -> HVAC - Install | Plumbing - Install (1) -> Plumbing - Install",
+     "ref": {
+      "current": 6,
+      "class": "Install",
+      "multi_family": false,
+      "map": [
+       "HVAC - Install - AOR (5) -> HVAC - Install",
+       "Plumbing - Install (1) -> Plumbing - Install"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-88",
+     "kind": "todo",
+     "text": "Split 'SAM Heating Service (10 System) 8+ Yrs' [System Check, 3 jobs]: HVAC - Maintenance (2) -> HVAC - Member System Check | HVAC - Service (1) -> HVAC - Member System Check",
+     "ref": {
+      "current": 3,
+      "class": "System Check",
+      "multi_family": false,
+      "map": [
+       "HVAC - Maintenance (2) -> HVAC - Member System Check",
+       "HVAC - Service (1) -> HVAC - Member System Check"
+      ]
+     }
+    },
+    {
+     "id": "JTC-9-89",
+     "kind": "verified",
+     "text": "88 job types place H1-completed jobs across more than one BU family (rule: ONE business unit per job type (J3, 2026-07-23); exception = (Location) variants of the same function BU. Derived from ACTUAL H1 job placement.) \u2014 full 88-row split published to jtc9_split_map.json.",
+     "ref": {
+      "current": 88
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json",
+    "jtc9_split_map.json"
+   ]
+  },
+  {
+   "id": "JTC-10",
+   "group": "job_types",
+   "title": "SALES funnel \u2014 Estimate (future TGL/Marketed/Big Box) on SALES BUs \u2014 Sold Threshold -> $1",
+   "status": "open",
+   "bu": "SALES BUs",
+   "job_type_scope": {
+    "count": 17,
+    "note": "see items[].ref.entity_id"
+   },
+   "class_scope": [
+    "Estimate"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-10-1",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate AC TGL' (ID 532267298): $100 -> $1",
+     "ref": {
+      "entity_id": 532267298,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 1210
+     }
+    },
+    {
+     "id": "JTC-10-2",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate AC Costco' (ID 846010): $100 -> $1",
+     "ref": {
+      "entity_id": 846010,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 369
+     }
+    },
+    {
+     "id": "JTC-10-3",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate AC' (ID 343): $100 -> $1",
+     "ref": {
+      "entity_id": 343,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 280
+     }
+    },
+    {
+     "id": "JTC-10-4",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Humidifier' (ID 313692071): $100 -> $1",
+     "ref": {
+      "entity_id": 313692071,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 33
+     }
+    },
+    {
+     "id": "JTC-10-5",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Ductwork' (ID 333430463): $100 -> $1",
+     "ref": {
+      "entity_id": 333430463,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 32
+     }
+    },
+    {
+     "id": "JTC-10-6",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Ductwork TGL' (ID 532279667): $100 -> $1",
+     "ref": {
+      "entity_id": 532279667,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 17
+     }
+    },
+    {
+     "id": "JTC-10-7",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Mini Split' (ID 346969887): $100 -> $1",
+     "ref": {
+      "entity_id": 346969887,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 12
+     }
+    },
+    {
+     "id": "JTC-10-8",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Mini Split Costco' (ID 532278637): $100 -> $1",
+     "ref": {
+      "entity_id": 532278637,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 7
+     }
+    },
+    {
+     "id": "JTC-10-9",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Furnace Costco' (ID 400684351): $100 -> $1",
+     "ref": {
+      "entity_id": 400684351,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-10-10",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Heat Pump' (ID 531622036): $100 -> $1",
+     "ref": {
+      "entity_id": 531622036,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 3
+     }
+    },
+    {
+     "id": "JTC-10-11",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Heat Pump Costco' (ID 532282305): $100 -> $1",
+     "ref": {
+      "entity_id": 532282305,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-10-12",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Commercial Estimate Cooling/Heating' (ID 624368530): $100 -> $1",
+     "ref": {
+      "entity_id": 624368530,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-10-13",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Package Unit Costco' (ID 532280797): $100 -> $1",
+     "ref": {
+      "entity_id": 532280797,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 2
+     }
+    },
+    {
+     "id": "JTC-10-14",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Move Equipment' (ID 361854229): $100 -> $1",
+     "ref": {
+      "entity_id": 361854229,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-10-15",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Mini Split TGL' (ID 532272809): $100 -> $1",
+     "ref": {
+      "entity_id": 532272809,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-10-16",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Furnace' (ID 531620765): $100 -> $1",
+     "ref": {
+      "entity_id": 531620765,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-10-17",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Estimate Aquatherm TGL' (ID 532269553): $100 -> $1",
+     "ref": {
+      "entity_id": 532269553,
+      "current": 100.0,
+      "target": 1,
+      "class": "Estimate",
+      "h1_completed_jobs": 1
+     }
+    },
+    {
+     "id": "JTC-10-18",
+     "kind": "verified",
+     "text": "17 of 17 matched job types violate the GS $1 threshold on 'SALES funnel \u2014 Estimate (future TGL/Marketed/Big Box) on SALES BUs' today (census_results.json -> threshold_audit[1]).",
+     "ref": {
+      "current": 17,
+      "target": 17
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "JTC-11",
+   "group": "job_types",
+   "title": "Return to Complete Repair (any BU) \u2014 Sold Threshold -> $999,999",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": [
+    315559748,
+    318759150,
+    340293530,
+    624531017
+   ],
+   "class_scope": [
+    "Return to Complete Repair"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "JTC-11-1",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 1-2 HRS' (ID 315559748): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315559748,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 613
+     }
+    },
+    {
+     "id": "JTC-11-2",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Part Install 3-5 HRS' (ID 340293530): $50 -> $999,999",
+     "ref": {
+      "entity_id": 340293530,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 545
+     }
+    },
+    {
+     "id": "JTC-11-3",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 4-5 HRS' (ID 318759150): $100 -> $999,999",
+     "ref": {
+      "entity_id": 318759150,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 355
+     }
+    },
+    {
+     "id": "JTC-11-4",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 1-2 HRS' (ID 315559748): $100 -> $999,999",
+     "ref": {
+      "entity_id": 315559748,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 144
+     }
+    },
+    {
+     "id": "JTC-11-5",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Plumbing Part Install 3-5 HRS' (ID 340293530): $50 -> $999,999",
+     "ref": {
+      "entity_id": 340293530,
+      "current": 50.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 143
+     }
+    },
+    {
+     "id": "JTC-11-6",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Install HVAC Part 4-5 HRS' (ID 318759150): $100 -> $999,999",
+     "ref": {
+      "entity_id": 318759150,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 99
+     }
+    },
+    {
+     "id": "JTC-11-7",
+     "kind": "todo",
+     "text": "Set Sold Threshold on 'Commercial Install HVAC Part' (ID 624531017): $100 -> $999,999",
+     "ref": {
+      "entity_id": 624531017,
+      "current": 100.0,
+      "target": 999999,
+      "class": "Return to Complete Repair",
+      "h1_completed_jobs": 6
+     }
+    },
+    {
+     "id": "JTC-11-8",
+     "kind": "verified",
+     "text": "7 of 7 matched job types violate the GS $999,999 threshold on 'Return to Complete Repair (any BU)' today (census_results.json -> threshold_audit[5]).",
+     "ref": {
+      "current": 7,
+      "target": 7
+     }
+    }
+   ],
+   "source_files": [
+    "census_results.json"
+   ]
+  },
+  {
+   "id": "WF-1",
+   "group": "workflows",
+   "title": "Workflows/Triggers manual audit (not API-readable)",
+   "status": "partner-decision",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "WF-1-1",
+     "kind": "partner",
+     "text": "Workflows/Triggers manual audit (not API-readable) \u2014 capture Sierra's live config review once, store it in the change-readiness gate.",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "model-tenant/gs-tightening-walk/2026-07-24-sierra-walk-capture.md"
+   ]
+  },
+  {
+   "id": "SOP-3",
+   "group": "sops",
+   "title": "Establish RTCR-on-originating-BU dispatch SOP",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": [
+    "Return to Complete Repair"
+   ],
+   "notion_url": null,
+   "items": [
+    {
+     "id": "SOP-3-1",
+     "kind": "todo",
+     "text": "Pull Sierra's 6 RTCR-class job types Jan-Jun and compare each RTCR job's BU to the BU of the original job it's completing",
+     "ref": {}
+    },
+    {
+     "id": "SOP-3-2",
+     "kind": "todo",
+     "text": "Draft dispatch SOP: 'When booking a Return to Complete Repair job, always assign the BU that matches the BU of the original job being completed' and route to RJ/Dan",
+     "ref": {}
+    },
+    {
+     "id": "SOP-3-3",
+     "kind": "partner",
+     "text": "Live mismatch rate should look roughly 1-in-5 to 1-in-6 per census \u2014 confirm live before drafting training, so effort targets a proven gap.",
+     "ref": {}
+    }
+   ],
+   "also_groups": [
+    "workflows"
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "SOP-6",
+   "group": "sops",
+   "title": "Adopt go-forward Flip/POPP booking convention for plumbing sales",
+   "status": "open",
+   "bu": "Plumbing",
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "SOP-6-1",
+     "kind": "partner",
+     "text": "Present Mike the fork: (a) reactivate Plumbing - Sales BU (355), or (b) adopt a go-forward Flip/POPP booking convention (book the sale/estimate under Plumbing - Service, route the install job under Plumbing - Install with a named installer)",
+     "ref": {}
+    },
+    {
+     "id": "SOP-6-2",
+     "kind": "todo",
+     "text": "If (b) is chosen: draft the Flip/POPP training + booking-time checklist for CSRs/dispatch",
+     "ref": {}
+    },
+    {
+     "id": "SOP-6-3",
+     "kind": "partner",
+     "text": "Confirm the Configurable Payroll case (04588354) pay-profile impact on installers before rolling out \u2014 real payroll-dispute risk if assumed clean without confirmation.",
+     "ref": {}
+    }
+   ],
+   "also_groups": [
+    "workflows"
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "MEM-1",
+   "group": "memberships",
+   "title": "Audit & repoint every SAM recurring-service template's BU/job-type pointer",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "MEM-1-1",
+     "kind": "todo",
+     "text": "Audit and repoint every SAM recurring-service template's BU/job-type pointer before the BU-1/BU-8 renames land",
+     "ref": {}
+    },
+    {
+     "id": "MEM-1-2",
+     "kind": "partner",
+     "text": "Confirm whether any Recurring Service Plan still targets dead BU 20865 ('OLD - HVAC - Commercial') \u2014 2 misrouted 2026 visits confirmed in this year's completed-job data.",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "MEM-2",
+   "group": "memberships",
+   "title": "Verify membership sales & dues billing field hygiene",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "MEM-2-1",
+     "kind": "todo",
+     "text": "Verify membership sales & dues billing cleanly populate Activation Method / SoldBy / No-Job-Number fields",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "MEM-3",
+   "group": "memberships",
+   "title": "Standardize Campaign Categories to the 15-Category Gold Standard",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "MEM-3-1",
+     "kind": "todo",
+     "text": "Standardize Sierra's Campaign Categories to the 15-Category Gold Standard (prerequisite for the BU-8 Costco BU retirement)",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "STF-1",
+   "group": "staffing",
+   "title": "Pull Install-BU job-technician assignment data",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "STF-1-1",
+     "kind": "todo",
+     "text": "Pull Install-BU job-technician assignment data to establish single-vs-multi-tech / lead-technician patterns",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "STF-2",
+   "group": "staffing",
+   "title": "Confirm JOB_SPLITS data quality feeding Service Techs headcount",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "STF-2-1",
+     "kind": "todo",
+     "text": "Confirm Sierra's JOB_SPLITS active-flag / tie-break data has no split-assignment quality issue feeding Service Techs headcount",
+     "ref": {}
+    },
+    {
+     "id": "STF-2-2",
+     "kind": "verified",
+     "text": "13 distinct sellers assigned to Estimates-Run jobs across HVAC-Sales(NR) + HVAC-Sales Costco(NR) for H1 (deduped), not 22 \u2014 per the accuracy-gate fix in the 2026-07-24 walk capture.",
+     "ref": {
+      "current": 13
+     }
+    }
+   ],
+   "source_files": [
+    "model-tenant/gs-tightening-walk/2026-07-24-sierra-walk-capture.md"
+   ]
+  },
+  {
+   "id": "BU-1",
+   "group": "business_units",
+   "title": "HVAC - Maintenance -> HVAC - Member System Checks",
+   "status": "open",
+   "bu": 342817560,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-1-1",
+     "kind": "todo",
+     "text": "Rename/retire 'HVAC - Maintenance' -> 'HVAC - Member System Checks' (ID 342817560)",
+     "ref": {
+      "entity_id": 342817560,
+      "current": "HVAC - Maintenance",
+      "target": "HVAC - Member System Checks"
+     }
+    },
+    {
+     "id": "BU-1-2",
+     "kind": "verified",
+     "text": "BU 342817560 ('HVAC - Maintenance') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 342817560,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-1-3",
+     "kind": "partner",
+     "text": "Accept-vs-backfill ruling on the 6 inactive tune-up job types' history still open \u2014 gates Jobs Run's class coverage.",
+     "ref": {}
+    },
+    {
+     "id": "BU-1-4",
+     "kind": "partner",
+     "text": "Confirm the SAM template that generated 2 membership visits on deactivated BU 20865 isn't also mis-mapped near this BU.",
+     "ref": {}
+    },
+    {
+     "id": "BU-1-5",
+     "kind": "partner",
+     "text": "Should the Marketing Pro audience check run strictly before the rename, or in parallel?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-2",
+   "group": "business_units",
+   "title": "Plumbing - Maintenance -> Plumbing - Member System Checks",
+   "status": "open",
+   "bu": 354,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-2-1",
+     "kind": "todo",
+     "text": "Rename/retire 'Plumbing - Maintenance' -> 'Plumbing - Member System Checks' (ID 354)",
+     "ref": {
+      "entity_id": 354,
+      "current": "Plumbing - Maintenance",
+      "target": "Plumbing - Member System Checks"
+     }
+    },
+    {
+     "id": "BU-2-2",
+     "kind": "verified",
+     "text": "BU 354 ('Plumbing - Maintenance') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 354,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-2-3",
+     "kind": "partner",
+     "text": "Has this BU's SAM template BU-ID pointer been confirmed the same way BU 20865 was checked?",
+     "ref": {}
+    },
+    {
+     "id": "BU-2-4",
+     "kind": "partner",
+     "text": "Is there an RJ/Dan naming-history sensitivity for plumbing similar to the HVAC Sales (NR) history?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-3",
+   "group": "business_units",
+   "title": "Plumbing - Drains -> Sewer - Service (cross-trade)",
+   "status": "open",
+   "bu": 595105985,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-3-1",
+     "kind": "todo",
+     "text": "Rename/retire 'Plumbing - Drains' -> 'Sewer - Service (cross-trade)' (ID 595105985)",
+     "ref": {
+      "entity_id": 595105985,
+      "current": "Plumbing - Drains",
+      "target": "Sewer - Service (cross-trade)"
+     }
+    },
+    {
+     "id": "BU-3-2",
+     "kind": "verified",
+     "text": "BU 595105985 ('Plumbing - Drains') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 595105985,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-3-3",
+     "kind": "partner",
+     "text": "Does Sierra's RPW workbook need a new Sewer tab/column structure, or does removing the zeroing formula suffice?",
+     "ref": {}
+    },
+    {
+     "id": "BU-3-4",
+     "kind": "partner",
+     "text": "Do the 48 H1 Install-class jobs (Jetter/Trenched Sewer) get reclassified as Sewer-Install candidates, or stay absorbed under Sewer - Service?",
+     "ref": {}
+    },
+    {
+     "id": "BU-3-5",
+     "kind": "partner",
+     "text": "RJ/Dan: does Sierra field staff use 'Drains' terminology day-to-day such that 'Sewer' will confuse dispatch?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-4",
+   "group": "business_units",
+   "title": "HVAC - Install - AOR -> HVAC - Install",
+   "status": "open",
+   "bu": 337,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-4-1",
+     "kind": "todo",
+     "text": "Rename/retire 'HVAC - Install - AOR' -> 'HVAC - Install' (ID 337)",
+     "ref": {
+      "entity_id": 337,
+      "current": "HVAC - Install - AOR",
+      "target": "HVAC - Install"
+     }
+    },
+    {
+     "id": "BU-4-2",
+     "kind": "verified",
+     "text": "BU 337 ('HVAC - Install - AOR') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 337,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-4-3",
+     "kind": "partner",
+     "text": "Does 'AOR' stand for anything RJ/Dan still actively use as a distinguishing label, or is it safe to drop entirely?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-5",
+   "group": "business_units",
+   "title": "HVAC - Sales (NR) -> HVAC - Sales",
+   "status": "open",
+   "bu": 370,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-5-1",
+     "kind": "todo",
+     "text": "Rename/retire 'HVAC - Sales (NR)' -> 'HVAC - Sales' (ID 370)",
+     "ref": {
+      "entity_id": 370,
+      "current": "HVAC - Sales (NR)",
+      "target": "HVAC - Sales"
+     }
+    },
+    {
+     "id": "BU-5-2",
+     "kind": "verified",
+     "text": "BU 370 ('HVAC - Sales (NR)') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 370,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-5-3",
+     "kind": "partner",
+     "text": "Does '(NR)' carry meaning RJ still relies on (e.g. 'No Retail')? Confirm before dropping.",
+     "ref": {}
+    },
+    {
+     "id": "BU-5-4",
+     "kind": "partner",
+     "text": "Should the HVAC - Sales Costco (NR) retirement be treated as a 7th lever in this same wave, or executed fully separately?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-6",
+   "group": "business_units",
+   "title": "Inventory (trailing space) -> Admin",
+   "status": "open",
+   "bu": 208554530,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-6-1",
+     "kind": "todo",
+     "text": "Rename/retire 'Inventory (trailing space)' -> 'Admin' (ID 208554530)",
+     "ref": {
+      "entity_id": 208554530,
+      "current": "Inventory (trailing space)",
+      "target": "Admin"
+     }
+    },
+    {
+     "id": "BU-6-2",
+     "kind": "verified",
+     "text": "BU 208554530 ('Inventory ') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 208554530,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-6-3",
+     "kind": "partner",
+     "text": "Confirm no purchasing/warehouse workflow semantically depends on a BU literally named 'Inventory' before renaming to Admin.",
+     "ref": {}
+    },
+    {
+     "id": "BU-6-4",
+     "kind": "partner",
+     "text": "Is 'Admin' the only GS-required standalone BU Sierra is missing?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-7",
+   "group": "business_units",
+   "title": "(new BU) -> HVAC - Marketed Tune Ups (add + rewire 6 donor job types)",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-7-1",
+     "kind": "todo",
+     "text": "Rename/retire '(new BU)' -> 'HVAC - Marketed Tune Ups (add + rewire 6 donor job types)'",
+     "ref": {
+      "entity_id": null,
+      "current": "(new BU)",
+      "target": "HVAC - Marketed Tune Ups (add + rewire 6 donor job types)"
+     }
+    },
+    {
+     "id": "BU-7-2",
+     "kind": "partner",
+     "text": "Accept the history dent vs backfill class on the 6 now-inactive tune-up job types \u2014 Mike's ruling still pending.",
+     "ref": {}
+    },
+    {
+     "id": "BU-7-3",
+     "kind": "partner",
+     "text": "Does the Brent/Matt Callback/Warranty class-split canon proposal need to land before or after this BU add?",
+     "ref": {}
+    },
+    {
+     "id": "BU-7-4",
+     "kind": "partner",
+     "text": "Cutover approach: backfill historical MTU-class jobs currently on HVAC - Service, or treat the new BU as forward-only from go-live?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-8",
+   "group": "business_units",
+   "title": "HVAC - Sales Costco (NR) -> (retire \u2014 deactivate, reassign, re-point attribution)",
+   "status": "open",
+   "bu": 340802904,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-8-1",
+     "kind": "todo",
+     "text": "Rename/retire 'HVAC - Sales Costco (NR)' -> '(retire \u2014 deactivate, reassign, re-point attribution)' (ID 340802904)",
+     "ref": {
+      "entity_id": 340802904,
+      "current": "HVAC - Sales Costco (NR)",
+      "target": "(retire \u2014 deactivate, reassign, re-point attribution)"
+     }
+    },
+    {
+     "id": "BU-8-2",
+     "kind": "verified",
+     "text": "BU 340802904 ('HVAC - Sales Costco (NR)') confirmed active=True in discover.json today.",
+     "ref": {
+      "entity_id": 340802904,
+      "current": true
+     }
+    },
+    {
+     "id": "BU-8-3",
+     "kind": "partner",
+     "text": "Does ST's BU inactivation orphan or silently archive jobs already scheduled on the Costco BU at cutover? (Unanswered on last check.)",
+     "ref": {}
+    },
+    {
+     "id": "BU-8-4",
+     "kind": "partner",
+     "text": "Does Mike want Costco preserved as a permanent sales-source/campaign dimension, or is this a transitional label?",
+     "ref": {}
+    },
+    {
+     "id": "BU-8-5",
+     "kind": "partner",
+     "text": "Timing \u2014 proceed now, or hold until the September partner-facing rollout window?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-9",
+   "group": "business_units",
+   "title": "Plumbing - Sales (inactive) -> (decide: reactivate vs accommodate on Service/Drains)",
+   "status": "open",
+   "bu": 355,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-9-1",
+     "kind": "todo",
+     "text": "Rename/retire 'Plumbing - Sales (inactive)' -> '(decide: reactivate vs accommodate on Service/Drains)' (ID 355)",
+     "ref": {
+      "entity_id": 355,
+      "current": "Plumbing - Sales (inactive)",
+      "target": "(decide: reactivate vs accommodate on Service/Drains)"
+     }
+    },
+    {
+     "id": "BU-9-2",
+     "kind": "verified",
+     "text": "BU 355 ('Plumbing - Sales') confirmed active=False in discover.json today.",
+     "ref": {
+      "entity_id": 355,
+      "current": false
+     }
+    },
+    {
+     "id": "BU-9-3",
+     "kind": "partner",
+     "text": "Core decision: reactivate BU 355 (and/or 352 Plumbing - Retro) vs. have Brent/Matt adjust the CO binding to accommodate plumbing estimates staying on Service/Drains?",
+     "ref": {}
+    },
+    {
+     "id": "BU-9-4",
+     "kind": "partner",
+     "text": "Does RJ want plumbing sold via a distinct comfort-advisor-style function, or is Sierra's plumbing model intentionally sell-off-the-truck?",
+     "ref": {}
+    },
+    {
+     "id": "BU-9-5",
+     "kind": "partner",
+     "text": "Is Plumbing - Retro (352) in scope at all, or only Plumbing - Sales (355)?",
+     "ref": {}
+    },
+    {
+     "id": "BU-9-6",
+     "kind": "partner",
+     "text": "Is ~818 TTM plumbing estimates enough volume to justify a dedicated BU, given Plumbing - Marketed Tune Ups was ruled sub-threshold at ~180 TTM?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "BU-10",
+   "group": "business_units",
+   "title": "Estimate Thermostat (312936300) / Estimate Move Equipment (361854229) \u2014 both on HVAC - Service (333) -> (rewire onto HVAC - Sales BU, or rule sub-threshold acceptance)",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "BU-10-1",
+     "kind": "todo",
+     "text": "Rename/retire 'Estimate Thermostat (312936300) / Estimate Move Equipment (361854229) \u2014 both on HVAC - Service (333)' -> '(rewire onto HVAC - Sales BU, or rule sub-threshold acceptance)'",
+     "ref": {
+      "entity_id": null,
+      "current": "Estimate Thermostat (312936300) / Estimate Move Equipment (361854229) \u2014 both on HVAC - Service (333)",
+      "target": "(rewire onto HVAC - Sales BU, or rule sub-threshold acceptance)"
+     }
+    },
+    {
+     "id": "BU-10-2",
+     "kind": "verified",
+     "text": "Job type 312936300 ('Estimate Thermostat') confirmed businessunitids='333' in discover.json today.",
+     "ref": {
+      "entity_id": 312936300,
+      "current": "333"
+     }
+    },
+    {
+     "id": "BU-10-3",
+     "kind": "verified",
+     "text": "Job type 361854229 ('Estimate Move Equipment') confirmed businessunitids='333' in discover.json today.",
+     "ref": {
+      "entity_id": 361854229,
+      "current": "333"
+     }
+    },
+    {
+     "id": "BU-10-4",
+     "kind": "partner",
+     "text": "Which BU should receive these types \u2014 does this wait on the Sales(NR)/Costco(NR) rename+retirement lever landing first?",
+     "ref": {}
+    },
+    {
+     "id": "BU-10-5",
+     "kind": "partner",
+     "text": "Is 2 job types the full extent of the gap, or does a live query surface more HVAC types sharing this pattern?",
+     "ref": {}
+    },
+    {
+     "id": "BU-10-6",
+     "kind": "partner",
+     "text": "Given the small volume, is this worth a config change now, or is 'accept as sub-threshold, immaterial' defensible?",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "discover.json",
+    "bu_families.json",
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "EQ-1",
+   "group": "equipment",
+   "title": "Type the 159 active pricebook equipment items with no typeId",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "EQ-1-1",
+     "kind": "todo",
+     "text": "Type the 159 active pricebook equipment items that currently carry no typeId, so future installs sold from them create typed equipment records",
+     "ref": {
+      "current": 159
+     }
+    },
+    {
+     "id": "EQ-1-2",
+     "kind": "verified",
+     "text": "159 of Sierra's active pricebook equipment items have no typeId today (2026-07-16 sierra_pricebook_equipment.json pull, cited in lever_map.nfm.md; recount live before citing).",
+     "ref": {
+      "current": 159
+     }
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "EQ-2",
+   "group": "equipment",
+   "title": "Map Sierra's equipment type names to Gold Standard naming",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "EQ-2-1",
+     "kind": "todo",
+     "text": "Map Sierra's active equipment type names to Gold Standard naming",
+     "ref": {}
+    },
+    {
+     "id": "EQ-2-2",
+     "kind": "partner",
+     "text": "Recount ACTIVE equipment types live before citing (local files support 16, not 17 \u2014 a recount prompt, not a count claim).",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "EQ-3",
+   "group": "equipment",
+   "title": "Set Replacement Ages + link OPP: tags on equipment types",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "EQ-3-1",
+     "kind": "todo",
+     "text": "Set Replacement Ages and link renamed OPP: tags on equipment types (the age-engine auto-apply) once EQ-2 naming + the TAG family land",
+     "ref": {}
+    },
+    {
+     "id": "EQ-3-2",
+     "kind": "partner",
+     "text": "Confirm whether the Replacement Age / Replacement Tag fields are truly UI-visible-but-API-blocked (403 API-scope gap), or blocked everywhere \u2014 gates whether a manual-UI-pass fallback is needed.",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "EQ-4",
+   "group": "equipment",
+   "title": "Decide on historical backfill of the 578,186 untyped installed equipment records",
+   "status": "open",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "EQ-4-1",
+     "kind": "todo",
+     "text": "Model the one-time tag-application wave size (how many of the 578,186, once typed, would ALSO already be past Replacement Age) before flipping the age engine live against a freshly-backfilled population",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-2",
+     "kind": "todo",
+     "text": "If backfill is approved, coordinate go-live timing with the Field SOP/training owner so CSRs aren't blindsided by a sudden volume increase in booking-screen flags",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-3",
+     "kind": "todo",
+     "text": "Size the bulk-write approach (batch call plan, expected runtime, rate-limit handling) before executing any backfill",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-4",
+     "kind": "todo",
+     "text": "Re-pull the equipment census post-backfill to confirm the untyped count dropped by the expected amount",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-5",
+     "kind": "todo",
+     "text": "Prepare a representative sample of untyped historical equipment names/descriptions for RJ/Dan to review before proposing a backfill methodology",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-6",
+     "kind": "todo",
+     "text": "Ask Amanda/Premium Support whether ST has a bulk-import mechanism for Equipment Type assignment better suited to 578,186 records than one-by-one API writes",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-7",
+     "kind": "todo",
+     "text": "Before any decision: pull and review a representative sample of untyped record names/descriptions to get a real read on data quality",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-8",
+     "kind": "todo",
+     "text": "If approved: after backfill, recompute the untyped count \u2014 expect it to drop to a residual (genuinely unrecognizable/blank descriptions), not a suspiciously round number",
+     "ref": {}
+    },
+    {
+     "id": "EQ-4-9",
+     "kind": "partner",
+     "text": "PARTNER decision, not a Redwood config task: rule on whether to backfill Equipment Type on the 578,186 already-installed, untyped equipment records (89% of Sierra's 646,964 total) before any execution work is scheduled.",
+     "ref": {
+      "current": 578186
+     }
+    }
+   ],
+   "source_files": [
+    "reporting/sierra-co-rpw-automation/execution-plan/lever-map/lever_map.nfm.md"
+   ]
+  },
+  {
+   "id": "CAMP-1",
+   "group": "campaigns",
+   "title": "Resolve campaign-category conformance gaps (findings-007)",
+   "status": "partner-decision",
+   "bu": null,
+   "job_type_scope": null,
+   "class_scope": null,
+   "notion_url": null,
+   "items": [
+    {
+     "id": "CAMP-1-1",
+     "kind": "partner",
+     "text": "[CATEGORY-CONFORMS, high] z 2023Nevada Trucking Association Buyers guide 7018 (#327231118) -- category='Yellow Pages' \u2014 category value has no ratified/clear Gold Standard mapping (judgment-tier, unmappable, or unrecognized) \u2014 Stop 5 C1/C7 treatment",
+     "ref": {}
+    },
+    {
+     "id": "CAMP-1-2",
+     "kind": "verified",
+     "text": "[COVERAGE, info] Sierra \u2014 2.2% (9653/441588) true coverage gap = blank (9653) + shadow-blank (0)  (C5/C10)",
+     "ref": {}
+    }
+   ],
+   "source_files": [
+    "findings-007-sierra-2026-07-24.json"
+   ]
+  }
+ ]
+}
+</script>
+
+<script>
+(function(){
+  "use strict";
+  var DATA = JSON.parse(document.getElementById('console-data').textContent);
+  var LEVERS_BY_ID = {};
+  DATA.levers.forEach(function(lv){ LEVERS_BY_ID[lv.id] = lv; });
+  var GROUPS = DATA.groups;
+
+  var STORE_KEY = 'sierra-console-v1';
+  function loadState(){
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if(!raw) return { checked:{} };
+      var parsed = JSON.parse(raw);
+      if(!parsed || typeof parsed !== 'object') return { checked:{} };
+      if(!parsed.checked) parsed.checked = {};
+      return parsed;
+    } catch(e){ return { checked:{} }; }
+  }
+  var STATE = loadState();
+  function saveState(){
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(STATE)); } catch(e){}
+  }
+
+  function esc(s){
+    if(s === null || s === undefined) return '';
+    return String(s)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;')
+      .replace(/'/g,'&#39;');
+  }
+
+  function isDone(item){
+    if(item.kind === 'verified') return true;
+    return !!STATE.checked[item.id];
+  }
+  function setChecked(itemId, val){
+    STATE.checked[itemId] = !!val;
+    saveState();
+  }
+
+  function leverProgress(lv){
+    var total = lv.items.length, done = 0;
+    for(var i=0;i<lv.items.length;i++){ if(isDone(lv.items[i])) done++; }
+    return { done: done, total: total };
+  }
+  function allProgress(){
+    var total=0, done=0;
+    DATA.levers.forEach(function(lv){
+      var p = leverProgress(lv);
+      total += p.total; done += p.done;
+    });
+    return { done: done, total: total };
+  }
+  function groupProgress(group){
+    var total=0, done=0;
+    group.levers.forEach(function(id){
+      var lv = LEVERS_BY_ID[id];
+      if(!lv) return;
+      var p = leverProgress(lv);
+      total += p.total; done += p.done;
+    });
+    return { done: done, total: total };
+  }
+  function fmtProgress(p){
+    return '<div class="progresswrap"><div class="pbar"><i style="width:' + (p.total? Math.round(100*p.done/p.total):0) + '%"></i></div><span class="ptext' + (p.total && p.done===p.total ? ' full':'') + '">' + p.done + '/' + p.total + '</span></div>';
+  }
+  function statusPill(status){
+    return '<span class="statuspill ' + esc(status) + '">' + esc(status) + '</span>';
+  }
+  function buDisplay(bu){
+    if(bu === null || bu === undefined || bu === '') return '&mdash;';
+    return esc(bu);
+  }
+  function classDisplay(cs){
+    if(!cs || !cs.length) return '&mdash;';
+    return esc(cs.join('; '));
+  }
+  function jobTypeDisplay(jts){
+    if(jts === null || jts === undefined) return '&mdash;';
+    if(Array.isArray(jts)) return jts.length + (jts.length===1 ? ' ID':' IDs');
+    if(typeof jts === 'object' && typeof jts.count === 'number') return jts.count + ' IDs';
+    return esc(String(jts));
+  }
+  function refSummary(ref){
+    if(!ref || typeof ref !== 'object') return '';
+    var keys = Object.keys(ref);
+    if(!keys.length) return '';
+    return keys.map(function(k){
+      var v = ref[k];
+      if(Array.isArray(v)) v = v.join(', ');
+      return esc(k) + ': ' + esc(v);
+    }).join(' &middot; ');
+  }
+
+  // ---- view state ----
+  var view = { selected: 'all', leverId: null };
+
+  // ---- footprint bar ----
+  function renderFootprint(){
+    var el = document.getElementById('footprint');
+    var ap = allProgress();
+    el.innerHTML =
+      '<span class="fp-lab">Sierra &middot; tenant ' + esc(DATA.tenant) + ' &middot; data generated ' + esc(DATA.generated) + '</span>' +
+      '<span><b>' + GROUPS.length + '</b> groups</span>' +
+      '<span><b>' + DATA.levers.length + '</b> levers</span>' +
+      '<span><b>' + ap.total + '</b> total items</span>' +
+      '<span><b>' + ap.done + '</b> checked off</span>';
+  }
+
+  // ---- group chips ----
+  var elChips = document.getElementById('groupchips');
+  function renderChips(){
+    var chips = [{ id:'all', label:'All levers' }].concat(GROUPS.map(function(g){ return { id:g.id, label:g.label }; }));
+    elChips.innerHTML = '';
+    chips.forEach(function(c){
+      var p = c.id === 'all' ? allProgress() : groupProgress(GROUPS.filter(function(g){return g.id===c.id;})[0]);
+      var pressed = (view.selected === c.id && !view.leverId);
+      var b = document.createElement('button');
+      b.className = 'entchip';
+      b.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+      b.innerHTML = '<span class="tick"></span>' + esc(c.label) + '<span class="gprog">' + p.done + '/' + p.total + '</span>';
+      b.onclick = function(){ view.selected = c.id; view.leverId = null; renderAll(); };
+      elChips.appendChild(b);
+    });
+  }
+
+  // ---- table rows ----
+  function leverRowGroup(lv, showGroup){
+    var p = leverProgress(lv);
+    var tds = '<td class="lvid">' + esc(lv.id) + '</td>';
+    tds += '<td class="lvtitle">' + esc(lv.title) + '<div style="margin-top:4px">' + statusPill(lv.status) + '</div></td>';
+    if(showGroup) tds += '<td><span class="dchip">' + esc(lv.group) + '</span></td>';
+    tds += '<td>' + buDisplay(lv.bu) + '</td>';
+    if(showGroup) tds += '<td>' + jobTypeDisplay(lv.job_type_scope) + '</td>';
+    tds += '<td>' + classDisplay(lv.class_scope) + '</td>';
+    tds += '<td>' + fmtProgress(p) + '</td>';
+    return '<tr class="rowlink" data-lever="' + esc(lv.id) + '">' + tds + '</tr>';
+  }
+
+  function renderGroupTable(groupId){
+    var group = GROUPS.filter(function(g){ return g.id === groupId; })[0];
+    var elLabel = document.getElementById('viewlabel');
+    var elSub = document.getElementById('viewsub');
+    if(!group){ view.selected = 'all'; return renderAggregateTable(); }
+    var levers = group.levers.map(function(id){ return LEVERS_BY_ID[id]; }).filter(Boolean);
+    elLabel.textContent = group.label.toUpperCase() + ' · ' + levers.length + ' LEVER' + (levers.length===1?'':'S');
+    elSub.textContent = 'Click a lever to open its checklist.';
+    var rows = levers.map(function(lv){ return leverRowGroup(lv, false); }).join('');
+    document.getElementById('content').innerHTML =
+      '<div class="tablewrap"><table class="lvtable"><thead><tr>' +
+      '<th>Lever</th><th>Title</th><th>BU</th><th>Class</th><th>Progress</th>' +
+      '</tr></thead><tbody>' + (rows || '<tr><td colspan="5"><div class="empty">No levers in this group.</div></td></tr>') + '</tbody></table></div>';
+    wireRows();
+  }
+
+  function renderAggregateTable(){
+    var elLabel = document.getElementById('viewlabel');
+    var elSub = document.getElementById('viewsub');
+    elLabel.textContent = 'ALL LEVERS · ' + DATA.levers.length;
+    elSub.textContent = 'Every lever across all 9 groups. Click a row to open its checklist.';
+    var rows = DATA.levers.map(function(lv){ return leverRowGroup(lv, true); }).join('');
+    document.getElementById('content').innerHTML =
+      '<div class="tablewrap"><table class="lvtable"><thead><tr>' +
+      '<th>Lever</th><th>Title</th><th>Group</th><th>BU</th><th>Job Type</th><th>Class</th><th>Progress</th>' +
+      '</tr></thead><tbody>' + (rows || '') + '</tbody></table></div>';
+    wireRows();
+  }
+
+  function wireRows(){
+    var rows = document.querySelectorAll('#content tr[data-lever]');
+    rows.forEach(function(r){
+      r.onclick = function(){ view.leverId = r.getAttribute('data-lever'); renderAll(); };
+    });
+  }
+
+  // ---- lever detail ----
+  function checkItemHtml(item, kindClass){
+    var done = isDone(item);
+    var disabled = item.kind === 'verified';
+    var refHtml = refSummary(item.ref);
+    var srcHtml = '';
+    if(item.kind === 'verified'){
+      srcHtml = '<span class="cisrc">&#9679; verified from data</span>';
+    }
+    return '<label class="checkitem ' + kindClass + (done?' done':'') + '" data-item="' + esc(item.id) + '">' +
+      '<input type="checkbox" ' + (done?'checked':'') + (disabled?' disabled':'') + ' data-item-cb="' + esc(item.id) + '">' +
+      '<span class="citext">' + esc(item.text) + srcHtml + (refHtml ? '<span class="ciref">' + refHtml + '</span>' : '') + '</span>' +
+      '</label>';
+  }
+
+  function renderDetail(leverId){
+    var lv = LEVERS_BY_ID[leverId];
+    var content = document.getElementById('content');
+    var elLabel = document.getElementById('viewlabel');
+    var elSub = document.getElementById('viewsub');
+    if(!lv){ view.leverId = null; return renderAll(); }
+    elLabel.textContent = lv.id + ' DETAIL';
+    elSub.textContent = '';
+
+    var verified = lv.items.filter(function(i){ return i.kind==='verified'; });
+    var todo = lv.items.filter(function(i){ return i.kind==='todo'; });
+    var partner = lv.items.filter(function(i){ return i.kind==='partner'; });
+    var todoP = { total: todo.length, done: todo.filter(isDone).length };
+    var partnerP = { total: partner.length, done: partner.filter(isDone).length };
+
+    var groupLabels = GROUPS.filter(function(g){ return g.levers.indexOf(lv.id) !== -1; }).map(function(g){ return g.label; });
+    var srcFiles = (lv.source_files||[]).map(function(f){ return '<span class="lic">' + esc(f) + '</span>'; }).join('');
+    var notionLink = lv.notion_url ? ' <a class="lic" href="' + esc(lv.notion_url) + '" target="_blank" rel="noopener">Notion &rarr;</a>' : '';
+
+    var html = '';
+    html += '<button class="backbtn" id="backbtn">&larr; Back</button>';
+    html += '<div class="plancard">' +
+      '<div class="planhead">' +
+        '<div class="ptitle">' + esc(lv.title) + '</div>' +
+        '<div class="psub">' + statusPill(lv.status) +
+          (groupLabels.length ? groupLabels.map(function(l){return '<span class="dchip">'+esc(l)+'</span>';}).join('') : '') +
+          '<span class="dchip">BU: ' + buDisplay(lv.bu).replace(/&mdash;/,'&mdash;') + '</span>' +
+          '<span class="dchip">Class: ' + classDisplay(lv.class_scope) + '</span>' +
+          '<span class="dchip">Job types: ' + jobTypeDisplay(lv.job_type_scope) + '</span>' +
+        '</div>' +
+        '<div style="margin-top:8px">' + srcFiles + notionLink + '</div>' +
+      '</div>' +
+      '<div class="stat3">' +
+        '<div class="s accent"><div class="n tnum">' + verified.length + '</div><div class="k">Verified from data</div></div>' +
+        '<div class="s"><div class="n tnum">' + todoP.done + '/' + todoP.total + '</div><div class="k">Do this &mdash; checked off</div></div>' +
+        '<div class="s high"><div class="n tnum">' + partnerP.done + '/' + partnerP.total + '</div><div class="k">Needs Partner &mdash; resolved</div></div>' +
+      '</div>' +
+      '<div class="detailbody">' +
+        '<h4 class="verified">&#9989; Verified from data <span class="cnt">(' + verified.length + ')</span></h4>' +
+        (verified.length ? verified.map(function(i){ return checkItemHtml(i,'verified'); }).join('') : '<div class="empty">Nothing pre-verified for this lever.</div>') +
+        '<h4 class="todo">&#11036; Do this <span class="cnt">(' + todoP.done + '/' + todoP.total + ')</span></h4>' +
+        (todo.length ? todo.map(function(i){ return checkItemHtml(i,'todo'); }).join('') : '<div class="empty">No direct actions &mdash; see Needs Partner below.</div>') +
+        '<h4 class="partner">&#10067; Needs Partner <span class="cnt">(' + partnerP.done + '/' + partnerP.total + ')</span></h4>' +
+        (partner.length ? partner.map(function(i){ return checkItemHtml(i,'partner'); }).join('') : '<div class="empty">No open partner questions for this lever.</div>') +
+      '</div>' +
+    '</div>';
+
+    content.innerHTML = html;
+    document.getElementById('backbtn').onclick = function(){ view.leverId = null; renderAll(); };
+    content.querySelectorAll('input[data-item-cb]').forEach(function(cb){
+      cb.onchange = function(){
+        setChecked(cb.getAttribute('data-item-cb'), cb.checked);
+        renderAll();
+      };
+    });
+  }
+
+  // ---- export ----
+  document.getElementById('exportbtn').onclick = function(){
+    var payload = {
+      exported_at: new Date().toISOString(),
+      partner: DATA.partner,
+      tenant: DATA.tenant,
+      data_generated: DATA.generated,
+      store_key: STORE_KEY,
+      checked: STATE.checked
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 1)], { type:'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'sierra-console-progress-' + (new Date().toISOString().slice(0,10)) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  };
+
+  // ---- render orchestration ----
+  function renderAll(){
+    renderFootprint();
+    renderChips();
+    if(view.leverId){ renderDetail(view.leverId); }
+    else if(view.selected === 'all'){ renderAggregateTable(); }
+    else { renderGroupTable(view.selected); }
+  }
+
+  renderAll();
+})();
+</script>
